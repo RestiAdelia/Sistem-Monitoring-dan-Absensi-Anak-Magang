@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['admin', 'mentor', 'magang'])->default('magang');
+            $table->string('nomor_induk');
+            $table->string('instansi')->nullable();
+            $table->foreignId('mentor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();
         });

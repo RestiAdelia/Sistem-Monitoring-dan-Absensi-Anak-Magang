@@ -15,6 +15,30 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @if(Auth::user()->role === 'admin')
+                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
+                            {{ __('Kelola Pengguna') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.graduation.index')" :active="request()->routeIs('admin.graduation.index')">
+                            {{ __('Kelulusan & Sertifikat') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if(Auth::user()->role === 'mentor')
+                        <x-nav-link :href="route('mentor.attendance.index')" :active="request()->routeIs('mentor.attendance.index')">
+                            {{ __('Kehadiran') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('mentor.logbooks.index')" :active="request()->routeIs('mentor.logbooks.index')">
+                            {{ __('Persetujuan Logbook') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('mentor.tasks.index')" :active="request()->routeIs('mentor.tasks.index')">
+                            {{ __('Kelola Tugas') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('mentor.grading.index')" :active="request()->routeIs('mentor.grading.index')">
+                            {{ __('Penilaian Akhir') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -70,6 +94,30 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @if(Auth::user()->role === 'admin')
+                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
+                    {{ __('Kelola Pengguna') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.graduation.index')" :active="request()->routeIs('admin.graduation.index')">
+                    {{ __('Kelulusan & Sertifikat') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if(Auth::user()->role === 'mentor')
+                <x-responsive-nav-link :href="route('mentor.attendance.index')" :active="request()->routeIs('mentor.attendance.index')">
+                    {{ __('Kehadiran') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('mentor.logbooks.index')" :active="request()->routeIs('mentor.logbooks.index')">
+                    {{ __('Persetujuan Logbook') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('mentor.tasks.index')" :active="request()->routeIs('mentor.tasks.index')">
+                    {{ __('Kelola Tugas') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('mentor.grading.index')" :active="request()->routeIs('mentor.grading.index')">
+                    {{ __('Penilaian Akhir') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
