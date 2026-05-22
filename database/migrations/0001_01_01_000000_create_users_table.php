@@ -18,9 +18,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'mentor', 'magang'])->default('magang');
-            $table->string('nomor_induk');
-            $table->string('instansi')->nullable();
-            $table->foreignId('mentor_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('nomor_induk')->nullable();
+            $table->unsignedBigInteger('data_magang_id')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

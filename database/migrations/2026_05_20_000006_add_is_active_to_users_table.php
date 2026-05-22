@@ -11,9 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_active')->default(true)->after('mentor_id');
-        });
+        if (!Schema::hasColumn('users', 'mentor_id')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->unsignedBigInteger('mentor_id')->nullable()->after('data_magang_id');
+            });
+        }
+
+        if (!Schema::hasColumn('users', 'is_active')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->boolean('is_active')->default(true)->after('mentor_id');
+            });
+        }
     }
 
     /**
@@ -21,8 +29,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('is_active');
-        });
+        if (Schema::hasColumn('users', 'is_active')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('is_active');
+            });
+        }
+
+        if (Schema::hasColumn('users', 'mentor_id')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('mentor_id');
+            });
+        }
     }
 };
