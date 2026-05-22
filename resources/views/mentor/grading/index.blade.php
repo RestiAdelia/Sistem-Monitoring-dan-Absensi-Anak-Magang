@@ -33,7 +33,7 @@
                             <div>
                                 <h4 class="text-base font-bold text-gray-800 mb-1">{{ $intern->name }}</h4>
                                 <div class="text-xs text-gray-500 space-y-1">
-                                    <div>NIM: <strong>{{ $intern->nomor_induk }}</strong> | Instansi: <strong>{{ $intern->instansi ?? '-' }}</strong></div>
+                                    <div>NIM: <strong>{{ $intern->nomor_induk }}</strong> | Instansi: <strong>{{ $intern->dataMagang->instansi ?? $intern->instansi ?? '-' }}</strong></div>
                                     <div>Kehadiran Terhitung: <strong class="text-indigo-600">{{ $intern->calculated_attendance }}%</strong></div>
                                     <div>Rata-rata Nilai Tugas: <strong class="text-indigo-600">{{ $intern->calculated_tasks }} / 100</strong></div>
                                 </div>

@@ -1,100 +1,90 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Tambah Pengguna Baru') }}
-        </h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Tambah Akun Baru') }}</h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-100 p-8">
-                <div class="mb-6">
-                    <h3 class="text-lg font-bold text-gray-800">Form Pengguna</h3>
-                    <p class="text-sm text-gray-500">Buat akun untuk admin, mentor, atau anak magang baru.</p>
-                </div>
-
-                @if($errors->any())
-                    <div class="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-800 rounded">
-                        <ul class="list-disc list-inside text-sm">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form action="{{ route('admin.users.store') }}" method="POST" x-data="{ role: '{{ request('role', 'magang') }}' }">
+    <!-- Pastikan x-data role diatur di sini -->
+    <div class="py-12" x-data="{ role: '{{ old('role', 'magang') }}' }">
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white shadow-xl sm:rounded-lg p-8 border border-gray-100">
+                
+                <form action="{{ route('admin.users.store') }}" method="POST">
                     @csrf
 
-                    <!-- Role -->
-                    <div class="mb-4">
-                        <label for="role" class="block text-sm font-semibold text-gray-700 mb-1">Peran / Role</label>
-                        <select name="role" id="role" x-model="role" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <option value="magang">Anak Magang (magang)</option>
-                            <option value="mentor">Mentor (mentor)</option>
-                            <option value="admin">Administrator (admin)</option>
+                    <!-- 1. Pilih Role (PENTING: x-model harus 'role') -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Peran Akun</label>
+                        <select name="role" x-model="role" class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
+                            <option value="magang">Anak Magang</option>
+                            <option value="mentor">Mentor</option>
+                            <option value="admin">Administrator</option>
                         </select>
                     </div>
 
-                    <!-- Nomor Induk -->
-                    <div class="mb-4">
-                        <label for="nomor_induk" class="block text-sm font-semibold text-gray-700 mb-1">Nomor Induk (NIM/NIP)</label>
-                        <input type="text" name="nomor_induk" id="nomor_induk" value="{{ old('nomor_induk') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <!-- 2. Dropdown Data Magang (Muncul jika role === 'magang') -->
+                    <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100" x-show="role === 'magang'">
+                        <label class="block text-sm font-bold text-blue-800 mb-2">Pilih Calon Anak Magang</label>
+                        <select name="data_magang_id" class="w-full rounded-md border-gray-300">
+                            <option value="">-- Cari Nama Anak Magang --</option>
+                            @foreach ($pendingInterns as $intern)
+                                <option value="{{ $intern->id }}" {{ old('data_magang_id') == $intern->id ? 'selected' : '' }}>
+                                    {{ $intern->nama }} ({{ $intern->nim_nisn }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-blue-600 mt-2 italic">*Hanya menampilkan data yang belum memiliki akun.</p>
                     </div>
 
-                    <!-- Nama -->
-                    <div class="mb-4">
-                        <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    </div>
-
-                    <!-- Email -->
-                    <div class="mb-4">
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    </div>
-
-                    <!-- Magang-specific: Instansi -->
-                    <div class="mb-4" x-show="role === 'magang'">
-                        <label for="instansi" class="block text-sm font-semibold text-gray-700 mb-1 font-medium">Asal Instansi / Universitas</label>
-                        <input type="text" name="instansi" id="instansi" value="{{ old('instansi') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    </div>
-
-                    <!-- Magang-specific: Plotting Mentor -->
-                    <div class="mb-4" x-show="role === 'magang'">
-                        <label for="mentor_id" class="block text-sm font-semibold text-gray-700 mb-1">Plotting Mentor</label>
-                        <select name="mentor_id" id="mentor_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <option value="">-- Pilih Mentor --</option>
-                            @foreach($mentors as $mentor)
-                                <option value="{{ $mentor->id }}" {{ old('mentor_id') == $mentor->id ? 'selected' : '' }}>
-                                    {{ $mentor->name }} ({{ $mentor->nomor_induk }})
+                    <!-- 3. Dropdown Data Mentor (Muncul jika role === 'mentor') -->
+                    <!-- Bagian ini yang sering bermasalah, pastikan menggunakan $pendingMentors -->
+                    <div class="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100" x-show="role === 'mentor'">
+                        <label class="block text-sm font-bold text-indigo-800 mb-2">Pilih Calon Mentor (Data dari Tabel Mentor)</label>
+                        <select name="data_mentor_id" class="w-full rounded-md border-gray-300">
+                            <option value="">-- Pilih Nama Mentor --</option>
+                            @foreach ($pendingMentors as $mentor)
+                                <option value="{{ $mentor->id }}" {{ old('data_mentor_id') == $mentor->id ? 'selected' : '' }}>
+                                    {{ $mentor->nama }} - ({{ $mentor->bidang }})
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <!-- Password -->
-                    <div class="mb-4">
-                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                        <input type="password" name="password" id="password" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <!-- 4. Input Manual (Muncul jika role === 'admin') -->
+                    <div x-show="role === 'admin'" class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700">Nama Lengkap Admin</label>
+                            <input type="text" name="name" value="{{ old('name') }}" class="w-full rounded-md border-gray-300">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700">NIP/Nomor Induk</label>
+                            <input type="text" name="nomor_induk" value="{{ old('nomor_induk') }}" class="w-full rounded-md border-gray-300">
+                        </div>
                     </div>
 
-                    <!-- Password Confirmation -->
-                    <div class="mb-6">
-                        <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 mb-1">Konfirmasi Password</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <!-- 5. Email & Password -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-bold text-gray-700">Email Login</label>
+                            <input type="email" name="email" value="{{ old('email') }}" required class="w-full rounded-md border-gray-300">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700">Password</label>
+                            <input type="password" name="password" required class="w-full rounded-md border-gray-300">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700">Konfirmasi Password</label>
+                            <input type="password" name="password_confirmation" required class="w-full rounded-md border-gray-300">
+                        </div>
                     </div>
 
-                    <!-- Submit -->
-                    <div class="flex items-center justify-end space-x-3">
-                        <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:ring focus:ring-blue-200 active:text-gray-800 active:bg-gray-50 transition ease-in-out duration-150">
-                            Batal
-                        </a>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
-                            Simpan Pengguna
+                    <div class="flex justify-end gap-3 border-t pt-6">
+                        <a href="{{ route('admin.users.index') }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">Batal</a>
+                        <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md font-bold hover:bg-indigo-700 transition">
+                            Buat Akun Sekarang
                         </button>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>

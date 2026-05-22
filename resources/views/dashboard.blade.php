@@ -20,7 +20,7 @@
                             </div>
                             <div class="bg-gray-50 p-4 rounded-md border">
                                 <span class="block text-xs uppercase font-bold text-gray-400">Asal Instansi</span>
-                                <span class="text-gray-800 font-semibold">{{ Auth::user()->instansi ?? 'Tidak dicantumkan' }}</span>
+                                <span class="text-gray-800 font-semibold">{{ Auth::user()->dataMagang->instansi ?? Auth::user()->instansi ?? 'Tidak dicantumkan' }}</span>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-md border sm:col-span-2">
                                 <span class="block text-xs uppercase font-bold text-gray-400">Mentor Pembimbing</span>

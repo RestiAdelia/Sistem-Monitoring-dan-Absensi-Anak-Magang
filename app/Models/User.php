@@ -4,19 +4,42 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'role', 'nomor_induk', 'instansi', 'mentor_id', 'is_active'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'nomor_induk',
+        'data_magang_id',
+        'data_mentor_id',
+        'mentor_id',
+        'is_active',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -32,21 +55,58 @@ class User extends Authenticatable
         ];
     }
 
+    // ──────────────────────────────────────────────
+    // Relationships for INTERN (role = 'magang')
+    // ──────────────────────────────────────────────
+
     /**
-     * Get the mentor who guides this user (intern).
+     * An intern user belongs to one DataAnakMagang record.
      */
-    public function mentor()
+    public function dataMagang()
     {
-        return $this->belongsTo(User::class, 'mentor_id');
+        return $this->belongsTo(DataAnakMagang::class, 'data_magang_id');
     }
 
     /**
-     * Get the interns guided by this user (mentor).
+     * A mentor user belongs to one DataMentor record.
+     */
+    public function dataMentor()
+    {
+        return $this->belongsTo(DataMentor::class, 'data_mentor_id');
+    }
+
+    // ──────────────────────────────────────────────
+    // Relationships for MENTOR (role = 'mentor')
+    // ──────────────────────────────────────────────
+
+    /**
+     * A mentor is the parent user of this intern account.
+     */
+    public function mentor()
+    {
+        return $this->belongsTo(self::class, 'mentor_id');
+    }
+
+    /**
+     * A mentor has many intern records assigned to them in data_anak_magang.
+     */
+    public function assignedInterns()
+    {
+        return $this->hasMany(DataAnakMagang::class, 'mentor_id');
+    }
+
+    /**
+     * A mentor has many intern user accounts assigned to them.
      */
     public function interns()
     {
-        return $this->hasMany(User::class, 'mentor_id');
+        return $this->hasMany(self::class, 'mentor_id')->where('role', 'magang');
     }
+
+    // ──────────────────────────────────────────────
+    // Existing operational relationships
+    // (absensis, logbooks, etc. still reference users.id)
+    // ──────────────────────────────────────────────
 
     /**
      * Get the attendance records of the user.

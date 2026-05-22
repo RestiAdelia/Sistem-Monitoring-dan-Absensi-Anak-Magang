@@ -50,7 +50,7 @@
                                 <tr class="hover:bg-gray-50 transition duration-150">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <div class="font-bold text-gray-800">{{ $intern->name }}</div>
-                                        <div class="text-xs text-gray-400">NIM: {{ $intern->nomor_induk }} | {{ $intern->instansi ?? '-' }}</div>
+                                        <div class="text-xs text-gray-400">NIM: {{ $intern->nomor_induk }} | {{ $intern->dataMagang->instansi ?? $intern->instansi ?? '-' }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
                                         {{ $intern->mentor->name ?? 'Belum diplot' }}

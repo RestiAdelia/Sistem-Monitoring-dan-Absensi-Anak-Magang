@@ -55,12 +55,6 @@
                         <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                     </div>
 
-                    <!-- Magang-specific: Instansi -->
-                    <div class="mb-4" x-show="role === 'magang'">
-                        <label for="instansi" class="block text-sm font-semibold text-gray-700 mb-1">Asal Instansi / Universitas</label>
-                        <input type="text" name="instansi" id="instansi" value="{{ old('instansi', $user->instansi) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    </div>
-
                     <!-- Magang-specific: Plotting Mentor -->
                     <div class="mb-4" x-show="role === 'magang'">
                         <label for="mentor_id" class="block text-sm font-semibold text-gray-700 mb-1">Plotting Mentor</label>
