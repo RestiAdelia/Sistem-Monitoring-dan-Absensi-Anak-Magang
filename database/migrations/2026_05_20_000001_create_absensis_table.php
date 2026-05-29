@@ -13,13 +13,16 @@ return new class extends Migration
     {
         Schema::create('absensis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('tanggal');
             $table->time('jam_masuk')->nullable();
             $table->time('jam_pulang')->nullable();
-            $table->double('latitude_masuk');
-            $table->double('longitude_masuk');
-            $table->enum('status_kehadiran', ['Hadir', 'Izin', 'Sakit', 'Alfa']);
+            $table->decimal('latitude_masuk', 10, 8)->nullable();
+            $table->decimal('longitude_masuk', 11, 8)->nullable();
+            $table->decimal('latitude_pulang', 10, 8)->nullable();
+            $table->decimal('longitude_pulang', 11, 8)->nullable();
+            $table->enum('status_kehadiran', ['Hadir', 'Izin', 'Sakit']);
+            $table->enum('status_kedatangan', ['Tepat Waktu', 'Terlambat', 'Izin', 'Sakit'])->nullable();
             $table->timestamps();
         });
     }

@@ -9,15 +9,64 @@ use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
-    // Define office coordinates and allowed radius (50 meters)
-    const OFFICE_LATITUDE = -6.200000;
-    const OFFICE_LONGITUDE = 106.816666;
-    const ALLOWED_RADIUS_METERS = 50;
+    // Office coordinates
+    const OFFICE_LATITUDE       = -0.9526046972684186;
+    const OFFICE_LONGITUDE      = 100.38929852527497;
+    const ALLOWED_RADIUS_METERS = 25; // 25 meter radius
 
-    /**
-     * Mobile API: Submit attendance (check-in / check-out).
-     * Endpoint: POST /api/absen
-     */
+    // Operational hours
+    const CHECKIN_START  = '08:00';
+    const CHECKIN_END    = '17:00';
+    const CHECKOUT_END   = '18:00';
+    const LATE_THRESHOLD = '08:15';
+
+    // -------------------------------------------------------
+    // Mobile API: Absensi hari ini
+    // GET /api/absen/today
+    // -------------------------------------------------------
+    public function today()
+    {
+        $user  = Auth::user();
+        $today = Carbon::today()->toDateString();
+
+        $absensi = Absensi::where('user_id', $user->id)
+            ->where('tanggal', $today)
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $absensi
+        ]);
+    }
+
+    // -------------------------------------------------------
+    // Mobile API: Ringkasan absensi bulan ini
+    // GET /api/absen/summary
+    // -------------------------------------------------------
+    public function summary()
+    {
+        $user  = Auth::user();
+        $month = Carbon::now()->month;
+        $year  = Carbon::now()->year;
+
+        $records = Absensi::where('user_id', $user->id)
+            ->whereMonth('tanggal', $month)
+            ->whereYear('tanggal', $year)
+            ->get();
+
+        return response()->json([
+            'success'   => true,
+            'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
+            'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
+            'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
+            'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
+        ]);
+    }
+
+    // -------------------------------------------------------
+    // Mobile API: Submit absensi (masuk / pulang)
+    // POST /api/absen
+    // -------------------------------------------------------
     public function submitAttendance(Request $request)
     {
         $user = Auth::user();
@@ -29,17 +78,56 @@ class AttendanceController extends Controller
         }
 
         $validated = $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude'         => 'required|numeric',
+            'longitude'        => 'required|numeric',
             'status_kehadiran' => 'required|in:Hadir,Izin,Sakit',
         ]);
 
-        $today = Carbon::today()->toDateString();
+        $now   = Carbon::now();
+        $today = $now->toDateString();
+
         $existingAbsensi = Absensi::where('user_id', $user->id)
             ->where('tanggal', $today)
             ->first();
 
-        // 1. Geofencing Validation for "Hadir"
+        // 1. Validasi Jam Operasional
+        $checkInStart = Carbon::createFromTimeString(self::CHECKIN_START);
+        $checkInEnd   = Carbon::createFromTimeString(self::CHECKIN_END);
+        $checkOutEnd  = Carbon::createFromTimeString(self::CHECKOUT_END);
+
+        if (!$existingAbsensi) {
+            if ($now->lt($checkInStart)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => sprintf(
+                        'Absen masuk belum dibuka. Silakan absen mulai pukul %s.',
+                        self::CHECKIN_START
+                    )
+                ], 422);
+            }
+
+            if ($now->gt($checkInEnd)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => sprintf(
+                        'Waktu absen masuk sudah ditutup sejak pukul %s.',
+                        self::CHECKIN_END
+                    )
+                ], 422);
+            }
+        } else {
+            if ($now->gt($checkOutEnd)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => sprintf(
+                        'Waktu absen pulang sudah ditutup sejak pukul %s.',
+                        self::CHECKOUT_END
+                    )
+                ], 422);
+            }
+        }
+
+        // 2. Geofencing — hanya untuk status "Hadir"
         if ($validated['status_kehadiran'] === 'Hadir') {
             $distance = $this->haversineDistance(
                 $validated['latitude'],
@@ -50,20 +138,19 @@ class AttendanceController extends Controller
 
             if ($distance > self::ALLOWED_RADIUS_METERS) {
                 return response()->json([
-                    'success' => false,
-                    'message' => sprintf(
+                    'success'  => false,
+                    'message'  => sprintf(
                         'Anda berada di luar radius kantor. Jarak Anda: %.2f meter (Maksimal %d meter).',
                         $distance,
                         self::ALLOWED_RADIUS_METERS
                     ),
-                    'distance' => $distance
+                    'distance' => round($distance, 2)
                 ], 422);
             }
         }
 
-        // 2. Handle Check-in vs Check-out
+        // 3. Check-in vs Check-out
         if ($existingAbsensi) {
-            // If already checked in today, perform check-out
             if ($existingAbsensi->jam_pulang) {
                 return response()->json([
                     'success' => false,
@@ -71,39 +158,64 @@ class AttendanceController extends Controller
                 ], 422);
             }
 
-            // Update check-out
             $existingAbsensi->update([
-                'jam_pulang' => Carbon::now()->toTimeString(),
+                'jam_pulang'       => $now->toTimeString(),
+                'latitude_pulang'  => $validated['latitude'],
+                'longitude_pulang' => $validated['longitude'],
             ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Absen pulang berhasil direkam.',
-                'data' => $existingAbsensi
-            ]);
-        } else {
-            // New check-in
-            $absensi = Absensi::create([
-                'user_id' => $user->id,
-                'tanggal' => $today,
-                'jam_masuk' => $validated['status_kehadiran'] === 'Hadir' ? Carbon::now()->toTimeString() : null,
-                'jam_pulang' => null,
-                'latitude_masuk' => $validated['latitude'],
-                'longitude_masuk' => $validated['longitude'],
-                'status_kehadiran' => $validated['status_kehadiran'],
+                'data'    => $existingAbsensi->fresh()
             ]);
 
-            return response()->json([
+        } else {
+            $statusKedatangan = $this->resolveStatusKedatangan(
+                $validated['status_kehadiran'],
+                $now
+            );
+
+            $absensi = Absensi::create([
+                'user_id'           => $user->id,
+                'tanggal'           => $today,
+                'jam_masuk'         => $validated['status_kehadiran'] === 'Hadir'
+                                            ? $now->toTimeString()
+                                            : null,
+                'jam_pulang'        => null,
+                'latitude_masuk'    => $validated['latitude'],
+                'longitude_masuk'   => $validated['longitude'],
+                'latitude_pulang'   => null,
+                'longitude_pulang'  => null,
+                'status_kehadiran'  => $validated['status_kehadiran'],
+                'status_kedatangan' => $statusKedatangan,
+            ]);
+
+            $responseData = [
                 'success' => true,
                 'message' => 'Absen masuk berhasil direkam.',
-                'data' => $absensi
-            ], 201);
+                'data'    => $absensi,
+            ];
+
+            if ($statusKedatangan === 'Terlambat') {
+                $lateMinutes = Carbon::createFromTimeString(self::LATE_THRESHOLD)
+                    ->diffInMinutes($now);
+
+                $responseData['keterlambatan'] = sprintf(
+                    'Anda terlambat %d menit dari batas toleransi pukul %s.',
+                    $lateMinutes,
+                    self::LATE_THRESHOLD
+                );
+            }
+
+            return response()->json($responseData, 201);
         }
     }
 
-    /**
-     * Web Dashboard: View real-time attendance of mentor's assigned interns.
-     */
+    // -------------------------------------------------------
+    // Web Dashboard: Lihat absensi intern milik mentor
+    // GET /mentor/attendance
+    // -------------------------------------------------------
     public function index()
     {
         $mentor = Auth::user();
@@ -111,7 +223,6 @@ class AttendanceController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // Retrieve attendance records of interns assigned to this mentor
         $internIds = $mentor->interns()->pluck('id');
 
         $absensis = Absensi::whereIn('user_id', $internIds)
@@ -123,23 +234,38 @@ class AttendanceController extends Controller
         return view('mentor.attendance.index', compact('absensis'));
     }
 
-    /**
-     * Calculate distance between two coordinate points in meters using Haversine formula.
-     */
-    private function haversineDistance($lat1, $lon1, $lat2, $lon2)
+    // -------------------------------------------------------
+    // Helper: Resolve status kedatangan
+    // -------------------------------------------------------
+    private function resolveStatusKedatangan(string $statusKehadiran, Carbon $now): string
     {
-        $earthRadius = 6371000; // in meters
+        if ($statusKehadiran === 'Izin')  return 'Izin';
+        if ($statusKehadiran === 'Sakit') return 'Sakit';
+
+        $lateThreshold = Carbon::createFromTimeString(self::LATE_THRESHOLD);
+
+        return $now->lte($lateThreshold) ? 'Tepat Waktu' : 'Terlambat';
+    }
+
+    // -------------------------------------------------------
+    // Helper: Haversine formula (meter)
+    // -------------------------------------------------------
+    private function haversineDistance($lat1, $lon1, $lat2, $lon2): float
+    {
+        $earthRadius = 6371000;
 
         $latFrom = deg2rad($lat1);
         $lonFrom = deg2rad($lon1);
-        $latTo = deg2rad($lat2);
-        $lonTo = deg2rad($lon2);
+        $latTo   = deg2rad($lat2);
+        $lonTo   = deg2rad($lon2);
 
         $latDelta = $latTo - $latFrom;
         $lonDelta = $lonTo - $lonFrom;
 
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+        $angle = 2 * asin(sqrt(
+            pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)
+        ));
 
         return $angle * $earthRadius;
     }

@@ -61,7 +61,8 @@ Route::post('/login', function (Request $request) {
 Route::middleware(['auth:sanctum', 'role:magang'])->group(function () {
     // Geofenced Attendance
     Route::post('/absen', [AttendanceController::class, 'submitAttendance']);
-    
+     Route::get('/absen/today', [AttendanceController::class, 'today']);
+    Route::get('/absen/summary', [AttendanceController::class, 'summary']); 
     // Logbook submission
     Route::post('/logbook', [LogbookController::class, 'submitLogbook']);
     
