@@ -7,36 +7,13 @@
 
     <div class="py-12 bg-gray-50/50">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-100 p-6"
-                 x-data="{ searchQuery: '' }">
-                 
-                <div class="mb-6 flex flex-col gap-4">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800">Pelacakan Presensi</h3>
-                            <p class="text-sm text-gray-500">Melihat data kehadiran harian dari anak magang yang Anda bimbing.</p>
-                        </div>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-200/60 p-6 sm:p-8">
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 tracking-tight">Pelacakan Presensi</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">Melihat data kehadiran harian dari anak magang yang Anda bimbing.</p>
                     </div>
-
-                    <div class="flex gap-2">
-                        <div class="flex-1 relative">
-                            <input 
-                                type="text" 
-                                placeholder="Cari berdasarkan nama, nim, tanggal, atau status..." 
-                                x-model="searchQuery"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                            />
-                            <svg x-show="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-2.5 h-5 w-5 text-gray-400 cursor-pointer hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </div>
-                        <button 
-                            @click="searchQuery = ''"
-                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
-                            Reset
-                        </button>
                     </div>
-                </div>
 
                 <div class="overflow-x-auto border border-gray-150 rounded-xl shadow-inner bg-white">
                     <table class="min-w-full divide-y divide-gray-200/80">
@@ -52,40 +29,28 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-100">
                             @forelse($absensis as $absen)
-                                @php
-                                    // Gabungkan semua data pencarian dalam satu string lowercase untuk dicocokkan oleh Alpine
-                                    $searchKeyword = strtolower(
-                                        $absen->user->name . ' ' . 
-                                        $absen->user->nomor_induk . ' ' . 
-                                        $absen->tanggal->format('d M Y') . ' ' . 
-                                        $absen->status_kehadiran
-                                    );
-                                @endphp
-
-                                <tr class="hover:bg-gray-50 transition duration-150"
-                                    x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
-                                    
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                                        {{ $absen->tanggal->format('d M Y') }}
+                                <tr class="hover:bg-slate-50/80 transition-colors duration-200">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{{ $absen->tanggal->format('d M Y') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-semibold text-gray-900">{{ $absen->user->name }}</span>
+                                            <span class="text-xs text-gray-400 mt-0.5 font-mono">NIM: {{ $absen->user->nomor_induk }}</span>
+                                        </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">
-                                        {{ $absen->user->name }}
-                                        <div class="text-xs text-gray-400 font-normal">NIM: {{ $absen->user->nomor_induk }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $absen->jam_masuk ? $absen->jam_masuk->format('H:i:s') : '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $absen->jam_pulang ? $absen->jam_pulang->format('H:i:s') : '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="https://maps.google.com/?q={{ $absen->latitude_masuk }},{{ $absen->longitude_masuk }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 inline-flex items-center space-x-1">
-                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                            <span class="text-xs">{{ round($absen->latitude_masuk, 5) }}, {{ round($absen->longitude_masuk, 5) }}</span>
-                                        </a>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">{{ $absen->jam_masuk ? $absen->jam_masuk->format('H:i:s') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">{{ $absen->jam_pulang ? $absen->jam_pulang->format('H:i:s') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($absen->latitude_masuk && $absen->longitude_masuk)
+                                            <a href="https://www.google.com/maps/search/?api=1&query={{ $absen->latitude_masuk }},{{ $absen->longitude_masuk }}" target="_blank" class="text-indigo-600 hover:text-indigo-700 bg-indigo-50/40 hover:bg-indigo-50 px-3 py-1.5 rounded-lg inline-flex items-center space-x-1.5 font-medium transition-colors border border-indigo-100/30">
+                                                <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                <span class="text-xs font-mono">{{ round($absen->latitude_masuk, 4) }}, {{ round($absen->longitude_masuk, 4) }}</span>
+                                            </a>
+                                        @else
+                                            <span class="text-gray-400">-</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         @if($absen->status_kehadiran === 'Hadir')

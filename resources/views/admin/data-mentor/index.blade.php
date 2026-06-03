@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="max-w-7xl mx-auto space-y-6" x-data="{ searchQuery: '' }">
+    <div class="max-w-7xl mx-auto space-y-6">
         <div class="bg-white shadow-sm sm:rounded-2xl border border-slate-200 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-200 bg-slate-50">
                 <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -17,23 +17,6 @@
                         class="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition">
                         Tambah Mentor
                     </a>
-                </div>
-            </div>
-
-            <!-- Search Input -->
-            <div class="px-6 py-4 border-b border-slate-200 bg-white">
-                <div class="flex gap-2">
-                    <input 
-                        type="text" 
-                        placeholder="Cari NIP/NIK atau nama..." 
-                        x-model="searchQuery"
-                        class="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button 
-                        @click="searchQuery = ''"
-                        class="px-4 py-2 bg-slate-200 text-slate-800 rounded-lg hover:bg-slate-300">
-                        Reset
-                    </button>
                 </div>
             </div>
 
@@ -58,13 +41,7 @@
                     <!-- ... bagian atas sama ... -->
                     <tbody class="bg-white divide-y divide-slate-200">
                         @forelse($mentors as $mentor)
-                            @php
-                                $searchKeyword = strtolower(
-                                    $mentor->bidang . ' ' . 
-                                    $mentor->nama
-                                );
-                            @endphp
-                            <tr class="hover:bg-slate-50 transition-colors duration-150" x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
+                            <tr class="hover:bg-slate-50 transition-colors duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
                                     {{ $mentor->bidang }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{{ $mentor->nama }}</td>

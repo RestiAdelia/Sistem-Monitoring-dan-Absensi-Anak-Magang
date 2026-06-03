@@ -2,17 +2,16 @@
     class="lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:flex lg:w-72 xl:w-80 lg:flex-col bg-[#0B1329] text-slate-200 rounded-none border-r border-slate-800 shadow-xl transition-all duration-300">
 
     <div class="hidden lg:flex lg:flex-col lg:h-full">
-        <!-- Logo Section -->
-        <div class="px-8 py-8 border-b border-white/10">
-            <div class="flex items-center gap-4">
-                <div class="p-2 bg-white/10 rounded-xl">
-                    <x-application-logo class="h-9 w-9 text-white" />
+        <div class="px-6 py-6 border-b border-slate-800 bg-black/10">
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-3.5 group">
+                <div class="p-2.5 bg-gradient-to-tr from-blue-500 via-indigo-500 to-violet-500 rounded-xl shadow-xl shadow-indigo-500/20 group-hover:rotate-6 transition-transform duration-300">
+                    <x-application-logo class="h-5 w-5 text-white" />
                 </div>
                 <div class="overflow-hidden">
                     <p class="text-sm font-extrabold tracking-tight text-white group-hover:text-indigo-400 transition-colors">{{ config('app.name', 'Laravel') }}</p>
                     <p class="text-[10px] text-indigo-400/80 font-semibold uppercase tracking-widest mt-0.5">Monitoring Magang</p>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">

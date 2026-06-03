@@ -7,7 +7,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            
             @if(session('success'))
                 <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded shadow-sm flex items-center justify-between">
                     <div class="flex items-center">
@@ -29,29 +28,10 @@
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-100 p-6" x-data="{ searchQuery: '' }">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-100 p-6">
                 <div class="mb-6">
                     <h3 class="text-lg font-bold text-gray-800">Daftar Sertifikasi Anak Magang</h3>
                     <p class="text-sm text-gray-500">Unggah sertifikat kelulusan bagi anak magang yang telah dinilai secara lengkap oleh mentor bimbingan.</p>
-                </div>
-
-                <div class="mb-4 flex gap-2">
-                    <div class="flex-1 relative">
-                        <input 
-                            type="text" 
-                            placeholder="Cari nama, NIM, instansi, atau mentor..." 
-                            x-model="searchQuery"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                        <svg x-show="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-2.5 h-5 w-5 text-gray-400 cursor-pointer hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </div>
-                    <button 
-                        @click="searchQuery = ''"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
-                        Reset
-                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -67,18 +47,7 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-150">
                             @forelse($interns as $intern)
-                                @php
-                                    $searchKeyword = strtolower(
-                                        $intern->name . ' ' . 
-                                        $intern->nomor_induk . ' ' . 
-                                        ($intern->dataMagang->instansi ?? $intern->instansi ?? '') . ' ' .
-                                        optional($intern->mentor)->name
-                                    );
-                                @endphp
-                                
-                                <tr class="hover:bg-gray-50 transition duration-150 cert-row" 
-                                    x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
-                                    
+                                <tr class="hover:bg-gray-50 transition duration-150">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <div class="font-bold text-gray-800">{{ $intern->name }}</div>
                                         <div class="text-xs text-gray-400">NIM: {{ $intern->nomor_induk }} | {{ $intern->dataMagang->instansi ?? $intern->instansi ?? '-' }}</div>
@@ -123,20 +92,13 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">Belum ada anak magang terdaftar.</td>
+                                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Belum ada anak magang terdaftar.</td>
                                 </tr>
                             @endforelse
-
-                            <tr x-show="searchQuery !== '' && [...$el.parentElement.querySelectorAll('.cert-row')].every(tr => tr.style.display === 'none')">
-                                <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500 italic">
-                                    Tidak ada data anak magang yang cocok dengan kata kunci "<span x-text="searchQuery"></span>"
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 </x-app-layout>

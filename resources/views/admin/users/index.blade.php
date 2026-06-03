@@ -14,27 +14,12 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
             <!-- SECTION KELOLA AKUN MENTOR -->
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border border-gray-200" x-data="{ searchQuery: '' }">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border border-gray-200">
                 <div class="mb-4 border-b pb-2 flex justify-between items-center">
                     <div>
                         <h3 class="text-lg font-bold text-indigo-700 underline decoration-2 underline-offset-8">Daftar Akun Mentor</h3>
                         <p class="text-sm text-gray-500 mt-1">Total: {{ $mentorAccounts->count() }} Akun</p>
                     </div>
-                </div>
-
-                <!-- Search Input -->
-                <div class="mb-4 flex gap-2">
-                    <input 
-                        type="text" 
-                        placeholder="Cari nama, NIP, atau email..." 
-                        x-model="searchQuery"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                    <button 
-                        @click="searchQuery = ''"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
-                        Reset
-                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -49,14 +34,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             @forelse($mentorAccounts as $account)
-                            @php
-                                $searchKeyword = strtolower(
-                                    $account->name . ' ' . 
-                                    $account->nomor_induk . ' ' . 
-                                    $account->email
-                                );
-                            @endphp
-                            <tr x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
+                            <tr>
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-gray-900">{{ $account->name }}</div>
                                     <div class="text-xs text-gray-500">{{ $account->nomor_induk }}</div>
@@ -88,27 +66,12 @@
             </div>
 
             <!-- SECTION KELOLA AKUN MAGANG -->
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border border-gray-200" x-data="{ searchQuery: '' }">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border border-gray-200">
                 <div class="mb-4 border-b pb-2 flex justify-between items-center">
                     <div>
                         <h3 class="text-lg font-bold text-emerald-700 underline decoration-2 underline-offset-8">Daftar Akun Anak Magang</h3>
                         <p class="text-sm text-gray-500 mt-1">Total: {{ $magangAccounts->count() }} Akun</p>
                     </div>
-                </div>
-
-                <!-- Search Input -->
-                <div class="mb-4 flex gap-2">
-                    <input 
-                        type="text" 
-                        placeholder="Cari nama, NIM, instansi, atau mentor..." 
-                        x-model="searchQuery"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                    <button 
-                        @click="searchQuery = ''"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
-                        Reset
-                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -124,15 +87,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             @forelse($magangAccounts as $account)
-                            @php
-                                $searchKeyword = strtolower(
-                                    $account->name . ' ' . 
-                                    $account->nomor_induk . ' ' . 
-                                    ($account->dataMagang->instansi ?? '') . ' ' .
-                                    optional($account->mentor)->name
-                                );
-                            @endphp
-                            <tr x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
+                            <tr>
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-gray-900">{{ $account->name }}</div>
                                     <div class="text-xs text-gray-500">{{ $account->nomor_induk }}</div>
@@ -154,7 +109,7 @@
                                     <a href="{{ route('admin.users.edit', $account->id) }}" class="text-blue-600 hover:underline">Edit</a>
                                     <form action="{{ route('admin.users.toggle-status', $account->id) }}" method="POST">
                                         @csrf
-                                        @method('PATCH')
+                                        @method('PATCH') {{-- Pastikan ini tertulis PATCH --}}
 
                                         <button type="submit" class="text-orange-600 hover:underline">
                                             {{ $account->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
