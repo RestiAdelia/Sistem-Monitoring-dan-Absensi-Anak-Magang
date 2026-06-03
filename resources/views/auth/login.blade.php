@@ -42,7 +42,7 @@
             <div class="flex flex-col items-center mb-6 text-center">
                 <div
                     class="p-3 bg-white rounded-full border border-white/20 shadow-xl mb-4 transform hover:scale-105 transition-transform duration-300 w-20 h-20 flex items-center justify-center overflow-hidden">
-                    <img src="{{ asset('build/assets/img/logo_mediatama.jpeg') }}" alt="Logo Mediatama"
+                    <img src="{{ asset('build/ass/img/logo_mediatama.jpeg') }}" alt="Logo Mediatama"
                         class="w-full h-full object-contain">
                 </div>
                 <h1 class="text-xl font-black text-white tracking-wider uppercase">MONITORING MAGANG</h1>
