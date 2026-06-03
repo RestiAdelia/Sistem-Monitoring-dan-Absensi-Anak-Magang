@@ -1,16 +1,25 @@
+
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-bold text-xl text-slate-800 leading-tight tracking-tight">
             {{ __('Daftar Anak Bimbingan Saya') }}
         </h2>
     </x-slot>
 
     <div class="py-12" x-data="{ searchQuery: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-2xl border border-gray-100">
-                <div class="p-6 border-b border-gray-100 bg-slate-50">
-                    <h3 class="text-lg font-bold text-slate-800">Anak Magang Aktif</h3>
-                    <p class="text-sm text-slate-500">Daftar mahasiswa/siswa yang sedang Anda bimbing saat ini.</p>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-slate-200/60">
+
+                <div class="p-6 sm:p-8 border-b border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 tracking-tight">Anak Magang Aktif</h3>
+                        <p class="text-sm text-slate-500 mt-0.5">Daftar mahasiswa atau siswa yang sedang Anda bimbing saat ini.</p>
+                    </div>
+
+                    <div class="flex items-center gap-2 self-start sm:self-auto bg-slate-50 border border-slate-100 px-3.5 py-1.5 rounded-xl">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        <span class="text-xs font-semibold text-slate-600">Total Bimbingan: {{ count($myInterns) }}</span>
+                    </div>
                 </div>
 
                 <!-- Search Input -->
@@ -89,7 +98,10 @@
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
 </x-app-layout>
+
+

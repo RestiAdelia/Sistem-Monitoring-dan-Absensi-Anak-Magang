@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-bold text-xl text-gray-800 leading-tight tracking-tight">
             {{ __('Kehadiran Anak Magang') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-gray-50/50">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-100 p-6"
                  x-data="{ searchQuery: '' }">
@@ -38,19 +38,19 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                <div class="overflow-x-auto border border-gray-150 rounded-xl shadow-inner bg-white">
+                    <table class="min-w-full divide-y divide-gray-200/80">
+                        <thead class="bg-gray-50/75 backdrop-blur-sm">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Anak Magang</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam Masuk</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam Pulang</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Koordinat</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200/50">Tanggal</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200/50">Anak Magang</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200/50">Jam Masuk</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200/50">Jam Pulang</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200/50">Koordinat</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200/50">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-150">
+                        <tbody class="bg-white divide-y divide-gray-100">
                             @forelse($absensis as $absen)
                                 @php
                                     // Gabungkan semua data pencarian dalam satu string lowercase untuk dicocokkan oleh Alpine
@@ -89,19 +89,19 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         @if($absen->status_kehadiran === 'Hadir')
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">
+                                            <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60">
                                                 Hadir
                                             </span>
                                         @elseif($absen->status_kehadiran === 'Izin')
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                                            <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-md bg-amber-50 text-amber-700 border border-amber-200/60">
                                                 Izin
                                             </span>
                                         @elseif($absen->status_kehadiran === 'Sakit')
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-md bg-blue-50 text-blue-700 border border-blue-200/60">
                                                 Sakit
                                             </span>
                                         @else
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-rose-100 text-rose-800">
+                                            <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-md bg-rose-50 text-rose-700 border border-rose-200/60">
                                                 Alfa
                                             </span>
                                         @endif
@@ -109,7 +109,17 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">Belum ada catatan presensi hari ini.</td>
+                                    <td colspan="6" class="px-6 py-16 text-center">
+                                        <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
+                                            <div class="p-3 bg-gray-100 rounded-2xl text-gray-400 mb-4 shadow-inner">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                                </svg>
+                                            </div>
+                                            <h4 class="text-sm font-bold text-gray-800">Tidak Ada Data Presensi</h4>
+                                            <p class="text-xs text-gray-400 mt-1 px-4">Belum ada catatan aktivitas presensi dari anak magang yang masuk untuk hari ini.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
