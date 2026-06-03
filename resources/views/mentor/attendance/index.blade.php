@@ -7,10 +7,35 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-100 p-6">
-                <div class="mb-6">
-                    <h3 class="text-lg font-bold text-gray-800">Pelacakan Presensi</h3>
-                    <p class="text-sm text-gray-500">Melihat data kehadiran harian dari anak magang yang Anda bimbing.</p>
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-100 p-6"
+                 x-data="{ searchQuery: '' }">
+                 
+                <div class="mb-6 flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Pelacakan Presensi</h3>
+                            <p class="text-sm text-gray-500">Melihat data kehadiran harian dari anak magang yang Anda bimbing.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <div class="flex-1 relative">
+                            <input 
+                                type="text" 
+                                placeholder="Cari berdasarkan nama, nim, tanggal, atau status..." 
+                                x-model="searchQuery"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            />
+                            <svg x-show="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-2.5 h-5 w-5 text-gray-400 cursor-pointer hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
+                        <button 
+                            @click="searchQuery = ''"
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
+                            Reset
+                        </button>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -27,14 +52,32 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-150">
                             @forelse($absensis as $absen)
-                                <tr class="hover:bg-gray-50 transition duration-150">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{{ $absen->tanggal->format('d M Y') }}</td>
+                                @php
+                                    // Gabungkan semua data pencarian dalam satu string lowercase untuk dicocokkan oleh Alpine
+                                    $searchKeyword = strtolower(
+                                        $absen->user->name . ' ' . 
+                                        $absen->user->nomor_induk . ' ' . 
+                                        $absen->tanggal->format('d M Y') . ' ' . 
+                                        $absen->status_kehadiran
+                                    );
+                                @endphp
+
+                                <tr class="hover:bg-gray-50 transition duration-150"
+                                    x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
+                                    
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                                        {{ $absen->tanggal->format('d M Y') }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">
                                         {{ $absen->user->name }}
                                         <div class="text-xs text-gray-400 font-normal">NIM: {{ $absen->user->nomor_induk }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $absen->jam_masuk ? $absen->jam_masuk->format('H:i:s') : '-' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $absen->jam_pulang ? $absen->jam_pulang->format('H:i:s') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $absen->jam_masuk ? $absen->jam_masuk->format('H:i:s') : '-' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $absen->jam_pulang ? $absen->jam_pulang->format('H:i:s') : '-' }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <a href="https://maps.google.com/?q={{ $absen->latitude_masuk }},{{ $absen->longitude_masuk }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 inline-flex items-center space-x-1">
                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

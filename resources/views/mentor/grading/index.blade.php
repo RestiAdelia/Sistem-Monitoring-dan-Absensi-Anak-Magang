@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="{ searchQuery: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @if(session('success'))
                 <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded shadow-sm flex items-center justify-between">
@@ -27,9 +27,31 @@
                     </div>
                 </div>
 
+                <!-- Search Input -->
+                <div class="mb-6 flex gap-2">
+                    <input 
+                        type="text" 
+                        placeholder="Cari nama, NIM, atau instansi..." 
+                        x-model="searchQuery"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button 
+                        @click="searchQuery = ''"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                        Reset
+                    </button>
+                </div>
+
                 <div class="space-y-6">
                     @forelse($interns as $intern)
-                        <div class="p-6 border border-gray-200 rounded-lg bg-gray-50 flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
+                        @php
+                            $searchKeyword = strtolower(
+                                $intern->name . ' ' . 
+                                $intern->nomor_induk . ' ' . 
+                                ($intern->dataMagang->instansi ?? $intern->instansi ?? '')
+                            );
+                        @endphp
+                        <div class="p-6 border border-gray-200 rounded-lg bg-gray-50 flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0" x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
                             <div>
                                 <h4 class="text-base font-bold text-gray-800 mb-1">{{ $intern->name }}</h4>
                                 <div class="text-xs text-gray-500 space-y-1">

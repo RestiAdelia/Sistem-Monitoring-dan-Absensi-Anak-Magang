@@ -65,12 +65,27 @@
                 </div>
 
                 <!-- Tasks and Submissions lists -->
-                <div class="lg:col-span-2 space-y-8">
+                <div class="lg:col-span-2 space-y-8" x-data="{ searchQuery: '' }">
                     <!-- Dispatched Tasks Card -->
                     <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-100 p-6">
                         <div class="mb-4">
                             <h3 class="text-lg font-bold text-gray-800">Daftar Tugas Terkirim</h3>
                             <p class="text-sm text-gray-500">Tugas-tugas yang telah diterbitkan untuk anak magang.</p>
+                        </div>
+
+                        <!-- Search Input -->
+                        <div class="mb-4 flex gap-2">
+                            <input 
+                                type="text" 
+                                placeholder="Cari judul tugas, deskripsi, atau deadline..." 
+                                x-model="searchQuery"
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                            <button 
+                                @click="searchQuery = ''"
+                                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                                Reset
+                            </button>
                         </div>
 
                         <div class="overflow-x-auto">
@@ -85,7 +100,14 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-150">
                                     @forelse($tasks as $task)
-                                        <tr>
+                                        @php
+                                            $searchKeyword = strtolower(
+                                                $task->judul_tugas . ' ' . 
+                                                $task->deskripsi_tugas . ' ' . 
+                                                $task->deadline->format('d M Y, H:i')
+                                            );
+                                        @endphp
+                                        <tr x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
                                             <td class="px-4 py-3 whitespace-nowrap text-sm">
                                                 <div class="font-bold text-gray-800">{{ $task->judul_tugas }}</div>
                                                 <div class="text-xs text-gray-400 truncate max-w-xs">{{ Str::limit($task->deskripsi_tugas, 50) }}</div>
@@ -123,7 +145,11 @@
 
                         <div class="space-y-4">
                             @forelse($submissions as $sub)
-                                <div class="p-4 border border-gray-200 rounded-md bg-gray-50 space-y-3">
+                                @php
+                                    $subSearch = strtolower($sub->tugas->judul_tugas . ' ' . $sub->user->name);
+                                @endphp
+                                <div class="p-4 border border-gray-200 rounded-md bg-gray-50 space-y-3"
+                                     x-show="searchQuery === '' || '{{ $subSearch }}'.includes(searchQuery.toLowerCase().trim())">
                                     <div class="flex justify-between items-start">
                                         <div>
                                             <h4 class="text-sm font-bold text-gray-800">{{ $sub->tugas->judul_tugas }}</h4>

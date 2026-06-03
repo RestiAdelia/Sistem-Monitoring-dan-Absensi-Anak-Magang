@@ -9,6 +9,7 @@ use App\Http\Controllers\GraduationController;
 use App\Http\Controllers\InternDataController;
 use App\Http\Controllers\mentor\MentorController;
 use App\Http\Controllers\MentorDataController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Models\DataAnakMagang;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     $user = Auth::user();
     if ($user->role === 'admin') {
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.dashboard');
     } elseif ($user->role === 'mentor') {
         return redirect()->route('mentor.attendance.index');
     } else {
@@ -37,6 +38,10 @@ Route::middleware('auth')->group(function () {
 
 // Admin dashboards (CRUD, Assignment/Plotting, Certificate uploads)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Admin Dashboard
+    Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/statistics', [AdminDashboardController::class, 'getStatistics'])->name('dashboard.statistics');
+    
     Route::resource('users', UserController::class);
     Route::post('users/{intern}/assign-mentor', [UserController::class, 'assignMentor'])->name('users.assign-mentor');
     Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])

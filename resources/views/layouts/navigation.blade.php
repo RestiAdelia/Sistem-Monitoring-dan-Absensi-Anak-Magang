@@ -5,7 +5,7 @@
     <div class="hidden lg:flex lg:flex-col lg:h-full">
         <!-- Logo Section -->
         <div class="px-8 py-8 border-b border-white/10">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-4">
+            <div class="flex items-center gap-4">
                 <div class="p-2 bg-white/10 rounded-xl">
                     <x-application-logo class="h-9 w-9 text-white" />
                 </div>
@@ -13,7 +13,7 @@
                     <p class="text-lg font-bold tracking-tight text-white">{{ config('app.name', 'Laravel') }}</p>
                     <p class="text-xs text-blue-200/60 font-medium uppercase tracking-widest">Monitoring Magang</p>
                 </div>
-            </a>
+            </div>
         </div>
 
         <!-- Navigation Links -->

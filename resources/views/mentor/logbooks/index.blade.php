@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="{ searchQuery: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @if(session('success'))
                 <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded shadow-sm flex items-center justify-between">
@@ -24,9 +24,32 @@
                     <p class="text-sm text-gray-500">Tinjau, setujui, atau tolak laporan aktivitas harian dari anak magang bimbingan Anda.</p>
                 </div>
 
+                <!-- Search Input -->
+                <div class="mb-6 flex gap-2">
+                    <input 
+                        type="text" 
+                        placeholder="Cari judul aktivitas, nama, atau deskripsi..." 
+                        x-model="searchQuery"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button 
+                        @click="searchQuery = ''"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                        Reset
+                    </button>
+                </div>
+
                 <div class="space-y-6">
                     @forelse($logbooks as $log)
-                        <div class="border border-gray-200 rounded-lg p-6 bg-gray-50 hover:shadow-md transition duration-200">
+                        @php
+                            $searchKeyword = strtolower(
+                                $log->judul_aktivitas . ' ' . 
+                                $log->deskripsi . ' ' . 
+                                $log->user->name . ' ' .
+                                $log->tanggal->format('d M Y')
+                            );
+                        @endphp
+                        <div class="border border-gray-200 rounded-lg p-6 bg-gray-50 hover:shadow-md transition duration-200" x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
                             <div class="flex flex-col md:flex-row md:justify-between md:items-start space-y-4 md:space-y-0">
                                 <div>
                                     <div class="flex items-center space-x-3 mb-2">
