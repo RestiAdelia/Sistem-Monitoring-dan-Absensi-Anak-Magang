@@ -7,6 +7,7 @@ use App\Models\PengumpulanTugas;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
 {
@@ -66,6 +67,70 @@ class TaskController extends Controller
     }
 
     /**
+     * Web View: Show form to edit a task.
+     */
+    public function edit(Tugas $task)
+    {
+        $mentor = Auth::user();
+        if ($mentor->role !== 'mentor' || $task->mentor_id !== $mentor->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        return view('mentor.tasks.edit', compact('task'));
+    }
+
+    /**
+     * Web View: Update an existing task.
+     */
+    public function update(Request $request, Tugas $task)
+    {
+        $mentor = Auth::user();
+        if ($mentor->role !== 'mentor' || $task->mentor_id !== $mentor->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $validated = $request->validate([
+            'judul_tugas' => 'required|string|max:255',
+            'deskripsi_tugas' => 'required|string',
+            'file_materi' => 'nullable|file|max:5120',
+            'deadline' => 'required|date_format:Y-m-d\TH:i',
+        ]);
+
+        if ($request->hasFile('file_materi')) {
+            // Hapus berkas file materi lama dari storage disk jika ada penggantian baru
+            if ($task->file_materi) {
+                Storage::disk('public')->delete($task->file_materi);
+            }
+            $validated['file_materi'] = $request->file('file_materi')->store('tasks', 'public');
+        }
+
+        $validated['deadline'] = Carbon::parse($validated['deadline']);
+        $task->update($validated);
+
+        return redirect()->route('mentor.tasks.index')->with('success', 'Dokumen tugas berhasil diperbarui.');
+    }
+
+    /**
+     * Web View: Delete a task along with its materials.
+     */
+    public function destroy(Tugas $task)
+    {
+        $mentor = Auth::user();
+        if ($mentor->role !== 'mentor' || $task->mentor_id !== $mentor->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Hapus file fisik materi tugas dari storage public disk agar tidak menumpuk sampah data
+        if ($task->file_materi) {
+            Storage::disk('public')->delete($task->file_materi);
+        }
+
+        $task->delete();
+
+        return redirect()->route('mentor.tasks.index')->with('success', 'Tugas bimbingan berhasil dihapus secara permanen dari sistem.');
+    }
+
+    /**
      * Web View: Grade an intern's submission.
      */
     public function gradeSubmission(Request $request, PengumpulanTugas $submission)
@@ -92,7 +157,6 @@ class TaskController extends Controller
 
     /**
      * Mobile API: Fetch tasks dispatched by the intern's mentor.
-     * Endpoint: GET /api/tasks
      */
     public function getTasks()
     {
@@ -132,7 +196,6 @@ class TaskController extends Controller
 
     /**
      * Mobile API: Submit task answer.
-     * Endpoint: POST /api/tasks/{id}/submit
      */
     public function submitTask(Request $request, $id)
     {
