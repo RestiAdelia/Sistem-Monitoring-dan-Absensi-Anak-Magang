@@ -6,7 +6,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-slate-50/50">
+    <div class="py-12" x-data="{ searchQuery: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             @if(session('success'))
@@ -28,14 +28,36 @@
                     <p class="text-sm text-slate-500 mt-0.5">Tinjau, setujui, atau tolak laporan aktivitas harian dari anak magang bimbingan Anda.</p>
                 </div>
 
-                <div class="space-y-5">
-                    @forelse($logbooks as $log)
-                        <div class="border border-slate-150 rounded-2xl p-5 sm:p-6 bg-white hover:border-slate-300 hover:shadow-xl hover:shadow-slate-100/50 transition-all duration-300">
-                            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+                <!-- Search Input -->
+                <div class="mb-6 flex gap-2">
+                    <input 
+                        type="text" 
+                        placeholder="Cari judul aktivitas, nama, atau deskripsi..." 
+                        x-model="searchQuery"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button 
+                        @click="searchQuery = ''"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                        Reset
+                    </button>
+                </div>
 
-                                <div class="flex-1 space-y-3">
-                                    <div class="flex flex-wrap items-center gap-2.5">
-                                        <span class="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100/40 px-2.5 py-1 rounded-md font-mono">
+                <div class="space-y-6">
+                    @forelse($logbooks as $log)
+                        @php
+                            $searchKeyword = strtolower(
+                                $log->judul_aktivitas . ' ' . 
+                                $log->deskripsi . ' ' . 
+                                $log->user->name . ' ' .
+                                $log->tanggal->format('d M Y')
+                            );
+                        @endphp
+                        <div class="border border-gray-200 rounded-lg p-6 bg-gray-50 hover:shadow-md transition duration-200" x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-start space-y-4 md:space-y-0">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <span class="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded">
                                             {{ $log->tanggal->format('d M Y') }}
                                         </span>
 

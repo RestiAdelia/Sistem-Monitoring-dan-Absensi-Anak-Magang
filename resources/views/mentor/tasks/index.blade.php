@@ -68,17 +68,33 @@
                     </form>
                 </div>
 
-                <div class="lg:col-span-2 space-y-8">
-
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-slate-200/60 p-6 sm:p-7">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-bold text-slate-900 tracking-tight">Daftar Tugas Terkirim</h3>
-                            <p class="text-sm text-slate-500 mt-0.5">Tugas-tugas yang telah diterbitkan untuk anak magang bimbingan Anda.</p>
+                <!-- Tasks and Submissions lists -->
+                <div class="lg:col-span-2 space-y-8" x-data="{ searchQuery: '' }">
+                    <!-- Dispatched Tasks Card -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-100 p-6">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Daftar Tugas Terkirim</h3>
+                            <p class="text-sm text-gray-500">Tugas-tugas yang telah diterbitkan untuk anak magang.</p>
                         </div>
 
-                        <div class="overflow-hidden border border-slate-100 rounded-xl shadow-inner">
-                            <table class="min-w-full divide-y divide-slate-200/80">
-                                <thead class="bg-slate-50/75 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
+                        <!-- Search Input -->
+                        <div class="mb-4 flex gap-2">
+                            <input 
+                                type="text" 
+                                placeholder="Cari judul tugas, deskripsi, atau deadline..." 
+                                x-model="searchQuery"
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                            <button 
+                                @click="searchQuery = ''"
+                                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                                Reset
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-5 py-3 text-left">Detail Tugas</th>
                                         <th class="px-5 py-3 text-left">Batas Waktu</th>
@@ -88,10 +104,17 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-slate-100">
                                     @forelse($tasks as $task)
-                                        <tr class="hover:bg-slate-50/50 transition-colors duration-150">
-                                            <td class="px-5 py-3 max-w-xs">
-                                                <div class="font-bold text-slate-800 text-sm truncate">{{ $task->judul_tugas }}</div>
-                                                <div class="text-xs text-slate-400 truncate mt-0.5">{{ Str::limit($task->deskripsi_tugas, 50) }}</div>
+                                        @php
+                                            $searchKeyword = strtolower(
+                                                $task->judul_tugas . ' ' . 
+                                                $task->deskripsi_tugas . ' ' . 
+                                                $task->deadline->format('d M Y, H:i')
+                                            );
+                                        @endphp
+                                        <tr x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                                <div class="font-bold text-gray-800">{{ $task->judul_tugas }}</div>
+                                                <div class="text-xs text-gray-400 truncate max-w-xs">{{ Str::limit($task->deskripsi_tugas, 50) }}</div>
                                             </td>
                                             <td class="px-5 py-3 whitespace-nowrap text-xs text-slate-500 font-mono">
                                                 {{ $task->deadline->format('d M Y, H:i') }}
@@ -127,18 +150,17 @@
 
                         <div class="space-y-4">
                             @forelse($submissions as $sub)
-                                <div class="p-4 border border-slate-150 rounded-xl bg-slate-50/50 hover:bg-white hover:border-slate-300 hover:shadow-lg hover:shadow-slate-100/40 transition-all duration-300 space-y-4">
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-
-                                        <div class="flex items-start gap-3">
-                                            <div class="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-50 to-blue-50 border border-indigo-100/40 flex items-center justify-center text-indigo-600 font-bold text-xs shadow-sm flex-shrink-0">
-                                                {{ substr($sub->user->name, 0, 1) }}
-                                            </div>
-                                            <div class="flex flex-col overflow-hidden">
-                                                <h4 class="text-sm font-bold text-slate-900 tracking-tight">{{ $sub->tugas->judul_tugas }}</h4>
-                                                <div class="text-[11px] text-slate-400 mt-0.5">
-                                                    Oleh: <strong class="text-slate-600 font-semibold">{{ $sub->user->name }}</strong> <span class="mx-1">|</span> Kumpul: <span class="font-mono">{{ $sub->waktu_kumpul->format('d M Y, H:i') }}</span>
-                                                </div>
+                                @php
+                                    $subSearch = strtolower($sub->tugas->judul_tugas . ' ' . $sub->user->name);
+                                @endphp
+                                <div class="p-4 border border-gray-200 rounded-md bg-gray-50 space-y-3"
+                                     x-show="searchQuery === '' || '{{ $subSearch }}'.includes(searchQuery.toLowerCase().trim())">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="text-sm font-bold text-gray-800">{{ $sub->tugas->judul_tugas }}</h4>
+                                            <div class="text-xs text-gray-500">
+                                                Oleh: <strong class="text-gray-700">{{ $sub->user->name }}</strong> | 
+                                                Kumpul: {{ $sub->waktu_kumpul->format('d M Y, H:i') }}
                                             </div>
                                         </div>
 

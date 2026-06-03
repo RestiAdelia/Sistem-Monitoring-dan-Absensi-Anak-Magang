@@ -6,7 +6,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-slate-50/50">
+    <div class="py-12" x-data="{ searchQuery: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             @if(session('success'))
@@ -34,30 +34,37 @@
                     </div>
                 </div>
 
+                <!-- Search Input -->
+                <div class="mb-6 flex gap-2">
+                    <input 
+                        type="text" 
+                        placeholder="Cari nama, NIM, atau instansi..." 
+                        x-model="searchQuery"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button 
+                        @click="searchQuery = ''"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                        Reset
+                    </button>
+                </div>
+
                 <div class="space-y-6">
                     @forelse($interns as $intern)
-                        <div class="p-5 sm:p-6 border border-slate-150 rounded-2xl bg-slate-50/40 hover:bg-white hover:border-slate-300 hover:shadow-xl hover:shadow-slate-100/40 transition-all duration-300 flex flex-col xl:flex-row xl:justify-between xl:items-center gap-6">
-
-                            <div class="space-y-3 flex-1">
-                                <div class="flex items-center gap-3">
-                                    <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-50 to-blue-50 border border-indigo-100/40 flex items-center justify-center text-indigo-600 font-extrabold text-sm shadow-sm flex-shrink-0">
-                                        {{ substr($intern->name, 0, 1) }}
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <h4 class="text-base font-bold text-slate-900 tracking-tight leading-tight">{{ $intern->name }}</h4>
-                                        <span class="text-xs text-slate-400 font-mono mt-0.5">NIM: {{ $intern->nomor_induk }} &middot; {{ $intern->dataMagang->instansi ?? $intern->instansi ?? 'Instansi Umum' }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-md pt-1">
-                                    <div class="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-sm flex items-center justify-between">
-                                        <span class="text-xs font-semibold text-slate-500">Kehadiran Terhitung:</span>
-                                        <span class="text-xs font-bold font-mono text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded border border-indigo-100/30">{{ $intern->calculated_attendance }}%</span>
-                                    </div>
-                                    <div class="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-sm flex items-center justify-between">
-                                        <span class="text-xs font-semibold text-slate-500">Rata-rata Nilai Tugas:</span>
-                                        <span class="text-xs font-bold font-mono text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded border border-indigo-100/30">{{ $intern->calculated_tasks }} / 100</span>
-                                    </div>
+                        @php
+                            $searchKeyword = strtolower(
+                                $intern->name . ' ' . 
+                                $intern->nomor_induk . ' ' . 
+                                ($intern->dataMagang->instansi ?? $intern->instansi ?? '')
+                            );
+                        @endphp
+                        <div class="p-6 border border-gray-200 rounded-lg bg-gray-50 flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0" x-show="searchQuery === '' || '{{ $searchKeyword }}'.includes(searchQuery.toLowerCase().trim())">
+                            <div>
+                                <h4 class="text-base font-bold text-gray-800 mb-1">{{ $intern->name }}</h4>
+                                <div class="text-xs text-gray-500 space-y-1">
+                                    <div>NIM: <strong>{{ $intern->nomor_induk }}</strong> | Instansi: <strong>{{ $intern->dataMagang->instansi ?? $intern->instansi ?? '-' }}</strong></div>
+                                    <div>Kehadiran Terhitung: <strong class="text-indigo-600">{{ $intern->calculated_attendance }}%</strong></div>
+                                    <div>Rata-rata Nilai Tugas: <strong class="text-indigo-600">{{ $intern->calculated_tasks }} / 100</strong></div>
                                 </div>
                             </div>
 
