@@ -33,6 +33,19 @@ class TaskController extends Controller
     }
 
     /**
+     * Web View: Form to create a new task.
+     */
+    public function create()
+    {
+        $mentor = Auth::user();
+        if ($mentor->role !== 'mentor') {
+            abort(403, 'Unauthorized');
+        }
+
+        return view('mentor.tasks.create');
+    }
+
+    /**
      * Web View: Store a newly dispatched task by a mentor.
      */
     public function store(Request $request)

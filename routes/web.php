@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AttendanceController;
@@ -24,9 +25,9 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     $user = Auth::user();
     if ($user->role === 'admin') {
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.dashboard');
     } elseif ($user->role === 'mentor') {
-        return redirect()->route('mentor.attendance.index');
+        return redirect()->route('mentor.dashboard');
     } else {
         return view('dashboard');
     }
@@ -41,6 +42,8 @@ Route::middleware('auth')->group(function () {
 
 // Admin dashboards (CRUD, Assignment/Plotting, Certificate uploads)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/statistics', [AdminDashboardController::class, 'getStatistics'])->name('dashboard.statistics');
     Route::resource('users', UserController::class);
     Route::post('users/{intern}/assign-mentor', [UserController::class, 'assignMentor'])->name('users.assign-mentor');
     Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])
@@ -68,19 +71,21 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 // Mentor dashboards (Attendance view, Logbook approval, Tasks distribution/grading, Graduation check)
 Route::middleware(['auth', 'role:mentor'])->prefix('mentor')->name('mentor.')->group(function () {
+    Route::get('dashboard', [MentorController::class, 'dashboard'])->name('dashboard');
     Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
 
     Route::get('logbooks', [LogbookController::class, 'index'])->name('logbooks.index');
     Route::post('logbooks/{logbook}/status', [LogbookController::class, 'updateStatus'])->name('logbooks.update-status');
 
     Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');
+    Route::get('tasks/create', [TaskController::class, 'create'])->name('tasks.create');
     Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
     Route::post('tasks/{submission}/grade', [TaskController::class, 'gradeSubmission'])->name('tasks.grade');
 
     Route::get('grading', [GraduationController::class, 'mentorIndex'])->name('grading.index');
     Route::post('grading/{intern}/grade', [GraduationController::class, 'mentorGrade'])->name('grading.submit');
 
-    Route::get('/my-mentor', [MentorController::class, 'dashboard'])->name('interns.index');
+    Route::get('/my-interns', [MentorController::class, 'interns'])->name('interns.index');
 });
 
 require __DIR__ . '/auth.php';

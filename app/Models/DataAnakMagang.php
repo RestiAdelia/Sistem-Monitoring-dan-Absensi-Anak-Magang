@@ -63,4 +63,8 @@ class DataAnakMagang extends Model
     {
         return $this->hasOne(User::class, 'data_magang_id');
     }
+    public function mentorData()
+    {
+        return $this->belongsTo(DataMentor::class, 'mentor_id', 'id');
+    }
 }
