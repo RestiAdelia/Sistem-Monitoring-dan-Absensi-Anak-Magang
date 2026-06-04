@@ -58,7 +58,7 @@ Route::post('/login', function (Request $request) {
     ]);
 });
 
-// Protected mobile API routes (Sanctum + Role check)
+// Protected mobile API routes (Sanctum + Role check))
 Route::middleware(['auth:sanctum', 'role:magang'])->group(function () {
     // Geofenced Attendance
     Route::post('/absen', [AttendanceController::class, 'submitAttendance']);

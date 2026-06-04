@@ -128,7 +128,7 @@ class ProfileController extends Controller
 
         $user->save();
 
-        // 🔥 2. Update juga nama di tabel data_anak_magang agar sinkron!
+        // 🔥 2. Update juga nama di tabel data_anak_magang agar sinkron!!
         DB::table('data_anak_magang')
             ->where('nama', $namaLama)
             ->update(['nama' => $user->name]);

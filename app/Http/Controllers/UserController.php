@@ -343,7 +343,7 @@ class UserController extends Controller
         // 2. Update tabel users utama
         $user->update($validated);
 
-        // 🔥 3. SINKRONISASI KE TABEL MAGANG / MENTOR
+        // 🔥 3. SINKRONISASI KE TABEL MAGANG / MENTORR
         if ($user->role === 'magang') {
             // Update nama di tabel data_anak_magang agar sinkron dengan Flutter
             if (!empty($user->data_magang_id)) {
