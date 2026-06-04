@@ -18,6 +18,8 @@ class Absensi extends Model
         'jam_pulang',
         'latitude_masuk',
         'longitude_masuk',
+        'latitude_pulang',
+        'longitude_pulang',
         'status_kehadiran',
         'status_kedatangan',
         'status',
@@ -30,6 +32,9 @@ class Absensi extends Model
         'jam_pulang' => 'datetime:H:i:s',
         'latitude_masuk' => 'double',
         'longitude_masuk' => 'double',
+        'latitude_pulang' => 'double',
+        'longitude_pulang' => 'double',
+        'keterangan_pulang' => 'string',
     ];
 
     /**
