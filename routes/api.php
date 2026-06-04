@@ -77,4 +77,5 @@ Route::middleware(['auth:sanctum', 'role:magang'])->group(function () {
 
     // Certificate download and final grades
     Route::get('/certificate', [GraduationController::class, 'getCertificate']);
+    Route::get('/logbook', [LogbookController::class, 'getLogbooks']);
 });

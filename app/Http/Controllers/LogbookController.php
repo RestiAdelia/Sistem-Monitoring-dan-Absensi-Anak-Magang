@@ -26,7 +26,7 @@ class LogbookController extends Controller
             'tanggal' => 'required|date',
             'judul_aktivitas' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'foto_bukti' => 'nullable|image|max:2048', // max 2MB
+            'foto_bukti' => 'nullable|image|max:10240', // max 2MB
         ]);
 
         // Check if logbook already exists for this date
@@ -106,5 +106,26 @@ class LogbookController extends Controller
         $logbook->update($validated);
 
         return redirect()->route('mentor.logbooks.index')->with('success', 'Status logbook berhasil diperbarui.');
+    }
+
+    public function getLogbooks()
+    {
+        $user = Auth::user();
+        if ($user->role !== 'magang') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya anak magang yang dapat melihat logbook.'
+            ], 403);
+        }
+
+        // Ambil logbook urut dari yang terbaru
+        $logbooks = Logbook::where('user_id', $user->id)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $logbooks
+        ], 200);
     }
 }
