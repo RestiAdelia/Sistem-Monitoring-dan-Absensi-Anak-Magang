@@ -285,6 +285,36 @@ class UserController extends Controller
     /**
      * Update the specified user in storage.
      */
+    // public function update(Request $request, User $user)
+    // {
+    //     $validated = $request->validate([
+    //         'name' => ['required', 'string', 'max:255'],
+    //         'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+    //         'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+    //         'role' => ['required', Rule::in(['admin', 'mentor', 'magang'])],
+    //         'nomor_induk' => ['required', 'string', 'max:50'],
+    //         'instansi' => ['nullable', 'string', 'max:255'],
+    //         'mentor_id' => [
+    //             'nullable',
+    //             Rule::requiredIf($request->role === 'magang'),
+    //             'exists:users,id'
+    //         ],
+    //     ]);
+
+    //     if (!empty($validated['password'])) {
+    //         $validated['password'] = Hash::make($validated['password']);
+    //     } else {
+    //         unset($validated['password']);
+    //     }
+
+    //     $user->update($validated);
+
+    //     return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
+    // }
+
+    /**
+     * Update the specified user in storage.
+     */
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
@@ -301,15 +331,36 @@ class UserController extends Controller
             ],
         ]);
 
+        // 🔥 1. Simpan nama lama SEBELUM diubah
+        $namaLama = $user->name;
+
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
         }
 
+        // 2. Update tabel users utama
         $user->update($validated);
 
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
+        // 🔥 3. SINKRONISASI KE TABEL MAGANG / MENTORR
+        if ($user->role === 'magang') {
+            // Update nama di tabel data_anak_magang agar sinkron dengan Flutter
+            if (!empty($user->data_magang_id)) {
+                \App\Models\DataAnakMagang::where('id', $user->data_magang_id)->update(['nama' => $user->name]);
+            } else {
+                \App\Models\DataAnakMagang::where('nama', $namaLama)->update(['nama' => $user->name]);
+            }
+        } elseif ($user->role === 'mentor') {
+            // Update nama di tabel data_mentor
+            if (!empty($user->data_mentor_id)) {
+                \App\Models\DataMentor::where('id', $user->data_mentor_id)->update(['nama' => $user->name]);
+            } else {
+                \App\Models\DataMentor::where('nama', $namaLama)->update(['nama' => $user->name]);
+            }
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui dan disinkronisasi ke tabel asal.');
     }
 
     /**

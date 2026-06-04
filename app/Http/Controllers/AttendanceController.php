@@ -58,8 +58,8 @@ class AttendanceController extends Controller
         return response()->json([
             'success'   => true,
             'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
-            'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
-            'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
+            // 'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
+            // 'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
             'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
         ]);
     }
