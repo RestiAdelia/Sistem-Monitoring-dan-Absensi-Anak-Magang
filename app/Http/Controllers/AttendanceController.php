@@ -12,11 +12,12 @@ class AttendanceController extends Controller
     // Office coordinates
     const OFFICE_LATITUDE       = -0.9526046972684186;
     const OFFICE_LONGITUDE      = 100.38929852527497;
-    const ALLOWED_RADIUS_METERS = 25; // 25 meter radius
+    const ALLOWED_RADIUS_METERS = 25;
 
     // Operational hours
     const CHECKIN_START  = '08:00';
     const CHECKIN_END    = '17:00';
+    const CHECKOUT_START = '17:00';
     const CHECKOUT_END   = '18:00';
     const LATE_THRESHOLD = '08:15';
 
@@ -77,6 +78,7 @@ class AttendanceController extends Controller
             ], 403);
         }
 
+        // Validasi field utama
         $validated = $request->validate([
             'latitude'         => 'required|numeric',
             'longitude'        => 'required|numeric',
@@ -89,6 +91,24 @@ class AttendanceController extends Controller
         $existingAbsensi = Absensi::where('user_id', $user->id)
             ->where('tanggal', $today)
             ->first();
+
+        // Deteksi apakah ini checkout lebih awal
+        $checkOutStart    = Carbon::createFromTimeString(self::CHECKOUT_START);
+        $isEarlyCheckout  = $existingAbsensi
+            && !$existingAbsensi->jam_pulang
+            && $now->lt($checkOutStart);
+
+        // Validasi keterangan_pulang — wajib jika checkout sebelum CHECKOUT_START
+        if ($isEarlyCheckout) {
+            $request->validate([
+                'keterangan_pulang' => 'required|string|max:255',
+            ], [
+                'keterangan_pulang.required' => sprintf(
+                    'Keterangan wajib diisi karena Anda pulang sebelum pukul %s.',
+                    self::CHECKOUT_START
+                ),
+            ]);
+        }
 
         // 1. Validasi Jam Operasional
         $checkInStart = Carbon::createFromTimeString(self::CHECKIN_START);
@@ -159,15 +179,20 @@ class AttendanceController extends Controller
             }
 
             $existingAbsensi->update([
-                'jam_pulang'       => $now->toTimeString(),
-                'latitude_pulang'  => $validated['latitude'],
-                'longitude_pulang' => $validated['longitude'],
+                'jam_pulang'        => $now->toTimeString(),
+                'latitude_pulang'   => $validated['latitude'],
+                'longitude_pulang'  => $validated['longitude'],
+                'keterangan_pulang' => $isEarlyCheckout
+                    ? $request->input('keterangan_pulang')
+                    : null,
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Absen pulang berhasil direkam.',
-                'data'    => $existingAbsensi->fresh()
+                'message' => $isEarlyCheckout
+                    ? 'Absen pulang lebih awal berhasil direkam.'
+                    : 'Absen pulang berhasil direkam.',
+                'data'    => $existingAbsensi->fresh(),
             ]);
 
         } else {
@@ -180,13 +205,14 @@ class AttendanceController extends Controller
                 'user_id'           => $user->id,
                 'tanggal'           => $today,
                 'jam_masuk'         => $validated['status_kehadiran'] === 'Hadir'
-                                            ? $now->toTimeString()
-                                            : null,
+                    ? $now->toTimeString()
+                    : null,
                 'jam_pulang'        => null,
                 'latitude_masuk'    => $validated['latitude'],
                 'longitude_masuk'   => $validated['longitude'],
                 'latitude_pulang'   => null,
                 'longitude_pulang'  => null,
+                'keterangan_pulang' => null,
                 'status_kehadiran'  => $validated['status_kehadiran'],
                 'status_kedatangan' => $statusKedatangan,
             ]);
