@@ -20,6 +20,8 @@ class Absensi extends Model
         'longitude_masuk',
         'status_kehadiran',
         'status_kedatangan',
+        'status',
+        'keterangan_pulang',
     ];
 
     protected $casts = [
