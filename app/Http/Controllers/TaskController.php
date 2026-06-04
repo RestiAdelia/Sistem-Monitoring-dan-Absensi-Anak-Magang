@@ -191,12 +191,13 @@ class TaskController extends Controller
 
         // Retrieve tasks from the intern's mentor
         $tasks = Tugas::where('mentor_id', $user->mentor_id)->get()->map(function($task) use ($user) {
-            // Check if the student has already submitted
             $submission = PengumpulanTugas::where('tugas_id', $task->id)
                 ->where('user_id', $user->id)
                 ->first();
 
             $task->is_submitted = !empty($submission);
+            // 🔥 MASALAHNYA DI SINI:
+            // Laravel memasukkan seluruh data pengumpulan ke dalam sub-objek 'submission'.
             $task->submission = $submission;
             return $task;
         });
