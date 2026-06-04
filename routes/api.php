@@ -3,6 +3,7 @@
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GraduationController;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -57,19 +58,23 @@ Route::post('/login', function (Request $request) {
     ]);
 });
 
-// Protected mobile API routes (Sanctum + Role check)
+// Protected mobile API routes (Sanctum + Role check))
 Route::middleware(['auth:sanctum', 'role:magang'])->group(function () {
     // Geofenced Attendance
     Route::post('/absen', [AttendanceController::class, 'submitAttendance']);
      Route::get('/absen/today', [AttendanceController::class, 'today']);
-    Route::get('/absen/summary', [AttendanceController::class, 'summary']); 
+    Route::get('/absen/summary', [AttendanceController::class, 'summary']);
     // Logbook submission
     Route::post('/logbook', [LogbookController::class, 'submitLogbook']);
-    
+
     // Task lists and submission
     Route::get('/tasks', [TaskController::class, 'getTasks']);
     Route::post('/tasks/{id}/submit', [TaskController::class, 'submitTask']);
-    
+
+    Route::get('/profil/detail', [ProfileController::class, 'getDetailMagang']);
+    Route::patch('/profile', [ProfileController::class, 'updateProfile']);
+    Route::put('/password', [ProfileController::class, 'updatePassword']);
+
     // Certificate download and final grades
     Route::get('/certificate', [GraduationController::class, 'getCertificate']);
 });
