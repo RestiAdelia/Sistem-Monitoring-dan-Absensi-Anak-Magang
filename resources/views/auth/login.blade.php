@@ -42,7 +42,7 @@
             <div class="flex flex-col items-center mb-6 text-center">
                 <div
                     class="p-3 bg-white rounded-full border border-white/20 shadow-xl mb-4 transform hover:scale-105 transition-transform duration-300 w-20 h-20 flex items-center justify-center overflow-hidden">
-                    <img src="{{ asset('build/ass/img/logo_mediatama.jpeg') }}" alt="Logo Mediatama"
+                    <img src="{{ asset('build/assets/img/logo_mediatama.jpeg') }}" alt="Logo Mediatama"
                         class="w-full h-full object-contain">
                 </div>
                 <h1 class="text-xl font-black text-white tracking-wider uppercase">MONITORING MAGANG</h1>
@@ -57,7 +57,7 @@
                     class="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent">
                 </div>
 
-                  <div class="mb-5 text-center">
+                <div class="mb-5 text-center">
                     <h2 class="text-lg font-bold text-white tracking-tight">Selamat Datang</h2>
                     <p class="text-xs text-slate-400 mt-0.5">Silakan masukkan akun Anda untuk masuk ke dashboard.</p>
                 </div>
@@ -125,14 +125,14 @@
                         </label>
                     </div> --}}
 
-                    <div class="flex items-center justify-between pt-2">
-                        <a class="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors duration-150 focus:outline-none focus:underline"
-                            href="{{ route('register') }}">
-                            {{ __('Belum punya akun?') }}
-                        </a>
+                    <div class="flex items-center justify-center pt-4 w-full">
+                        {{-- <a class="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors duration-150 focus:outline-none focus:underline"
+        href="{{ route('register') }}">
+        {{ __('Belum punya akun?') }}
+    </a> --}}
 
                         <button type="submit"
-                            class="py-2.5 px-6 bg-gradient-to-r from-indigo-600 to-[#4f46e5] hover:from-indigo-500 hover:to-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/30 hover:shadow-xl hover:shadow-indigo-500/40 active:scale-[0.98] transition-all duration-200 text-sm tracking-wide text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-[#0f172a]">
+                            class="w-full sm:w-auto py-2.5 px-8 bg-gradient-to-r from-indigo-600 to-[#4f46e5] hover:from-indigo-500 hover:to-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/30 hover:shadow-xl hover:shadow-indigo-500/40 active:scale-[0.98] transition-all duration-200 text-sm tracking-wider text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-[#0f172a]">
                             {{ __('MASUK') }}
                         </button>
                     </div>
