@@ -28,6 +28,14 @@
                 <span class="w-1 h-1 rounded-full bg-indigo-500/60"></span> Menu Admin
             </div>
 
+            <a href="{{ route('admin.absensi.index') }}"
+                class="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-medium transition-all duration-300 hover:translate-x-1 {{ request()->routeIs('admin.absensi.*') ? 'bg-gradient-to-r from-indigo-500/20 via-blue-500/10 to-transparent text-white border-l-2 border-indigo-500 font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
+                <span class="inline-flex h-5 w-5 items-center justify-center {{ request()->routeIs('admin.absensi.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                </span>
+                Absensi
+            </a>
+
             <a href="{{ route('admin.users.index') }}"
                 class="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-medium transition-all duration-300 hover:translate-x-1 {{ request()->routeIs('admin.users.*') ? 'bg-gradient-to-r from-indigo-500/20 via-blue-500/10 to-transparent text-white border-l-2 border-indigo-500 font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                 <span class="inline-flex h-5 w-5 items-center justify-center {{ request()->routeIs('admin.users.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}">

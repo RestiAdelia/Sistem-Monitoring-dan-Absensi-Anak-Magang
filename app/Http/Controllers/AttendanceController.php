@@ -260,6 +260,22 @@ class AttendanceController extends Controller
         return view('mentor.attendance.index', compact('absensis'));
     }
 
+    public function adminIndex()
+    {
+        // Memastikan hanya admin yang bisa mengakses data global
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized');
+        }
+
+        // Mengambil semua data absensi anak magang tanpa filter mentor_id
+        $absensis = Absensi::with(['user.dataMagang.mentor'])
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('jam_masuk', 'desc')
+            ->get();
+
+        return view('admin.absensi.index', compact('absensis'));
+    }
+
     // -------------------------------------------------------
     // Helper: Resolve status kedatangan
     // -------------------------------------------------------
