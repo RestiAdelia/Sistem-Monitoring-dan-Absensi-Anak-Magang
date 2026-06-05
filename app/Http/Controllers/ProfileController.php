@@ -62,39 +62,68 @@ class ProfileController extends Controller
     }
 
     // API: Mengambil Detail Magang
+    // public function getDetailMagang(Request $request)
+    // {
+    //     $user = $request->user();
+
+    //     // 1. Cari data magangnya dulu
+    //     $dataMagang = DB::table('data_anak_magang')
+    //                     ->where('nama', $user->name)
+    //                     ->first();
+
+    //     if ($dataMagang) {
+    //         // 2. Cari nama mentornya di tabel data_mentor berdasarkan mentor_id
+    //         $namaMentor = 'Belum ada mentor'; // Default text
+
+    //         if ($dataMagang->mentor_id) {
+    //             $mentor = DB::table('data_mentor')
+    //                         ->where('id', $dataMagang->mentor_id)
+    //                         ->first();
+
+    //             // Mengambil kolom 'nama' dari tabel data_mentor
+    //             if ($mentor) {
+    //                 $namaMentor = $mentor->nama;
+    //             }
+    //         }
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'data' => [
+    //                 'name' => $user->name,
+    //                 'email' => $user->email,
+    //                 'instansi' => $dataMagang->instansi,
+    //                 'tanggal_mulai_magang' => $dataMagang->tanggal_mulai_magang,
+    //                 'tanggal_selesai_magang' => $dataMagang->tanggal_selesai_magang,
+    //                 'nama_mentor' => $namaMentor, // 🔥 Kita ganti jadi ngirim nama aslinya
+    //             ]
+    //         ], 200);
+    //     }
+
+    //     return response()->json([
+    //         'success' => false,
+    //         'message' => 'Data detail magang belum tersedia.',
+    //         'data' => null
+    //     ], 404);
+    // }
+
+    // API: Mengambil Detail Magang
     public function getDetailMagang(Request $request)
     {
-        $user = $request->user();
+        // 1. Ambil user login beserta data relasinya secara otomatis (Magic Laravel!)
+        $user = $request->user()->load(['dataMagang', 'mentor']);
 
-        // 1. Cari data magangnya dulu
-        $dataMagang = DB::table('data_anak_magang')
-                        ->where('nama', $user->name)
-                        ->first();
-
-        if ($dataMagang) {
-            // 2. Cari nama mentornya di tabel data_mentor berdasarkan mentor_id
-            $namaMentor = 'Belum ada mentor'; // Default text
-
-            if ($dataMagang->mentor_id) {
-                $mentor = DB::table('data_mentor')
-                            ->where('id', $dataMagang->mentor_id)
-                            ->first();
-
-                // Mengambil kolom 'nama' dari tabel data_mentor
-                if ($mentor) {
-                    $namaMentor = $mentor->nama;
-                }
-            }
-
+        if ($user) {
             return response()->json([
                 'success' => true,
                 'data' => [
                     'name' => $user->name,
                     'email' => $user->email,
-                    'instansi' => $dataMagang->instansi,
-                    'tanggal_mulai_magang' => $dataMagang->tanggal_mulai_magang,
-                    'tanggal_selesai_magang' => $dataMagang->tanggal_selesai_magang,
-                    'nama_mentor' => $namaMentor, // 🔥 Kita ganti jadi ngirim nama aslinya
+                    // 2. Ambil data instansi dan tanggal dari relasi dataMagang
+                    'instansi' => $user->dataMagang->instansi ?? '-',
+                    'tanggal_mulai_magang' => $user->dataMagang->tanggal_mulai_magang ?? '-',
+                    'tanggal_selesai_magang' => $user->dataMagang->tanggal_selesai_magang ?? '-',
+                    // 🔥 3. Ambil nama mentor langsung dari relasi user mentor!
+                    'nama_mentor' => $user->mentor ? $user->mentor->name : 'Belum ada mentor',
                 ]
             ], 200);
         }
