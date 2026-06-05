@@ -27,13 +27,13 @@ class AdminDashboardController extends Controller
         $query = Absensi::with([
             'user.dataMagang.mentor.dataMentor'
         ]);
-        
+
         // Filter by date range if there's data, otherwise show all
         $monthAttendance = (clone $query)->whereBetween('tanggal', [
             now()->startOfMonth(),
             now()->endOfMonth()
         ])->count();
-        
+
         if ($monthAttendance > 0) {
             $query->whereBetween('tanggal', [
                 now()->startOfMonth(),
@@ -55,12 +55,12 @@ class AdminDashboardController extends Controller
                 $internIds = DataAnakMagang::where('mentor_id', $mentorData->userAccount->id)
                     ->where('status_akun', 'Aktif')
                     ->pluck('id');
-                
+
                 // Get user IDs for those interns
                 $userIds = User::whereIn('data_magang_id', $internIds)
                     ->where('role', 'magang')
                     ->pluck('id');
-                
+
                 $query->whereIn('user_id', $userIds);
             }
         }
@@ -123,7 +123,7 @@ class AdminDashboardController extends Controller
             $mentorUser = User::whereHas('dataMentor', function ($q) use ($mentorId) {
                 $q->where('data_mentor.id', $mentorId);
             })->first();
-            
+
             if ($mentorUser) {
                 $query->whereHas('user.dataMagang', function ($q) use ($mentorUser) {
                     $q->where('mentor_id', $mentorUser->id);
@@ -140,5 +140,19 @@ class AdminDashboardController extends Controller
         ];
 
         return response()->json($statistics);
+    }
+
+    public function adminAbsensiIndex()
+    {
+        // Menarik seluruh data log absensi global tanpa filter whereBetween tanggal berjalan
+        $absensis = Absensi::with([
+            'user.dataMagang.mentor.dataMentor'
+        ])
+        ->orderBy('tanggal', 'desc')
+        ->orderBy('jam_masuk', 'desc')
+        ->get();
+
+        // Mengarahkan ke file view admin/absensi/index.blade.php yang kita buat kemarin
+        return view('admin.absensi.index', compact('absensis'));
     }
 }
