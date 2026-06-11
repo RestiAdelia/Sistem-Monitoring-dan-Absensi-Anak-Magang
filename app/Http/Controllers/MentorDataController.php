@@ -21,13 +21,26 @@ class MentorDataController extends Controller
         return view('admin.data-mentor.index', compact('mentors'));
     }
 
+    /**
+     * =======================================================
+     * FUNGSI BARU: Menampilkan halaman form tambah mentor
+     * =======================================================
+     */
+    public function create()
+    {
+        return view('admin.data-mentor.create');
+    }
+
+    /**
+     * Menyimpan data mentor baru ke database
+     */
     public function store(Request $request)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
             'bidang' => 'required|string|max:255',
             'no_hp' => 'nullable|string|max:15',
-            'email' => 'nullable|email',
+            'email' => 'nullable|email|unique:data_mentor,email', // Ditambahkan unique check agar email tidak kembar
             'jk' => 'required|in:Laki-laki,Perempuan',
             'status' => 'required|in:Aktif,Tidak Aktif',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -49,13 +62,32 @@ class MentorDataController extends Controller
         return redirect()->route('admin.data-mentor.index')->with('success', 'Mentor berhasil ditambahkan.');
     }
 
+    /**
+     * Menampilkan detail mentor (Jika diperlukan)
+     */
+    public function show(DataMentor $data_mentor)
+    {
+        return view('admin.data-mentor.show', compact('data_mentor'));
+    }
+
+    /**
+     * Menampilkan halaman edit data mentor
+     */
+    public function edit(DataMentor $data_mentor)
+    {
+        return view('admin.data-mentor.edit', compact('data_mentor'));
+    }
+
+    /**
+     * Memperbarui data mentor di database
+     */
     public function update(Request $request, DataMentor $data_mentor)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
             'bidang' => 'required|string|max:255',
             'no_hp' => 'nullable|string|max:15',
-            'email' => 'nullable|email',
+            'email' => 'nullable|email|unique:data_mentor,email,' . $data_mentor->id, // Mengabaikan ID sendiri saat validasi unique
             'jk' => 'required|in:Laki-laki,Perempuan',
             'status' => 'required|in:Aktif,Tidak Aktif',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -64,7 +96,10 @@ class MentorDataController extends Controller
         $data = $request->only(['nama', 'bidang', 'no_hp', 'email', 'jk', 'status']);
 
         if ($request->hasFile('foto')) {
-            if ($data_mentor->foto) Storage::disk('public')->delete($data_mentor->foto);
+            // Hapus foto lama dari storage jika ada berkas baru yang diunggah
+            if ($data_mentor->foto) {
+                Storage::disk('public')->delete($data_mentor->foto);
+            }
             $data['foto'] = $request->file('foto')->store('mentor_photos', 'public');
         }
 
@@ -72,22 +107,23 @@ class MentorDataController extends Controller
 
         return redirect()->route('admin.data-mentor.index')->with('success', 'Data berhasil diperbarui.');
     }
+
     /**
      * Hapus data mentor
      */
     public function destroy(DataMentor $data_mentor)
     {
-        // Cek apakah sudah ada akun user
+        // Cek apakah sudah ada akun user yang terikat
         if ($data_mentor->status_akun === 'Aktif') {
             return back()->with('error', 'Data mentor tidak bisa dihapus karena akun user sudah aktif. Hapus akun user terlebih dahulu.');
+        }
+
+        // PERBAIKAN: Hapus fisik file foto dari storage sebelum baris data di database hilang
+        if ($data_mentor->foto) {
+            Storage::disk('public')->delete($data_mentor->foto);
         }
 
         $data_mentor->delete();
         return redirect()->route('admin.data-mentor.index')->with('success', 'Data mentor berhasil dihapus.');
     }
-    public function show(DataMentor $data_mentor)
-    {
-        return view('admin.data-mentor.show', compact('data_mentor'));
-    }
-
 }

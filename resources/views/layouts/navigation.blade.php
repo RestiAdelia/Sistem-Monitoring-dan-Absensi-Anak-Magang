@@ -36,6 +36,8 @@
                 Absensi
             </a>
 
+            
+
             <a href="{{ route('admin.users.index') }}"
                 class="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-medium transition-all duration-300 hover:translate-x-1 {{ request()->routeIs('admin.users.*') ? 'bg-gradient-to-r from-indigo-500/20 via-blue-500/10 to-transparent text-white border-l-2 border-indigo-500 font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                 <span class="inline-flex h-5 w-5 items-center justify-center {{ request()->routeIs('admin.users.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}">

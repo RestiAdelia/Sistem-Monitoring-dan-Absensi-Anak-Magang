@@ -84,9 +84,11 @@ class GraduationController extends Controller
      */
     public function adminIndex()
     {
+        // PERBAIKAN: Mengubah ->get() menjadi ->paginate(10) agar fitur pagination di Blade berfungsi aktif
         $interns = User::where('role', 'magang')
-            ->with(['mentor', 'nilaiAkhirDanSertifikat'])
-            ->get();
+            ->with(['mentor', 'nilaiAkhirDanSertifikat', 'dataMagang'])
+            ->orderBy('name', 'asc')
+            ->paginate(10);
 
         return view('admin.graduation.index', compact('interns'));
     }
@@ -116,7 +118,6 @@ class GraduationController extends Controller
 
     /**
      * Mobile API: Expose PDF download link and scores for the intern.
-     * Endpoint: GET /api/certificate
      */
     public function getCertificate()
     {
