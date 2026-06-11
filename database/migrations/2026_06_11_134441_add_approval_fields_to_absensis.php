@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('absensis', function (Blueprint $table) {
-        $table->string('status_approval')->default('approved'); 
+        $table->string('status_approval')->nullable();
+        $table->string('tanggal_mulai')->nullable();
+        $table->string('tanggal_selesai')->nullable();
         $table->string('lampiran')->nullable(); 
         $table->text('keterangan_admin')->nullable(); 
         });
@@ -24,7 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('absensis', function (Blueprint $table) {
-            $table->dropColumn(['status_approval', 'lampiran', 'keterangan_admin']);
+            $table->dropColumn(['status_approval', 'tanggal_mulai', 'tanggal_selesai', 'lampiran', 'keterangan_admin']);
         });
     }
 };

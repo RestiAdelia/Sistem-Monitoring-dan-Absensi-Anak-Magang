@@ -41,30 +41,6 @@ class AttendanceController extends Controller
     }
 
     // -------------------------------------------------------
-    // Mobile API: Ringkasan absensi bulan ini
-    // GET /api/absen/summary
-    // -------------------------------------------------------
-    // public function summary()
-    // {
-    //     $user  = Auth::user();
-    //     $month = Carbon::now()->month;
-    //     $year  = Carbon::now()->year;
-
-    //     $records = Absensi::where('user_id', $user->id)
-    //         ->whereMonth('tanggal', $month)
-    //         ->whereYear('tanggal', $year)
-    //         ->get();
-
-    //     return response()->json([
-    //         'success'   => true,
-    //         'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
-    //         // 'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
-    //         // 'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
-    //         'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
-    //     ]);
-   // }
-
-    // -------------------------------------------------------
     // Mobile API: Submit absensi (masuk / pulang)
     // POST /api/absen
     // -------------------------------------------------------
@@ -321,39 +297,61 @@ class AttendanceController extends Controller
         $request->validate([
             'status_kehadiran' => 'required|in:Izin,Sakit',
             'keterangan'       => 'required|string|min:10',
-            'lampiran'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB
+            'tanggal_mulai'    => 'required|date|after_or_equal:today',
+            'tanggal_selesai'  => 'required|date|after_or_equal:tanggal_mulai',
+            'lampiran'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $today = Carbon::today()->toDateString();
+        $start = Carbon::parse($request->tanggal_mulai);
+        $end   = Carbon::parse($request->tanggal_selesai);
 
-        // Cek apakah sudah ada absen/pengajuan hari ini
-        $existing = Absensi::where('user_id', $user->id)->where('tanggal', $today)->first();
+        // 1. Cek apakah di rentang tanggal tersebut user sudah punya data absen
+        $existing = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])
+            ->first();
+
         if ($existing) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda sudah melakukan presensi atau pengajuan hari ini.'
+                'message' => 'Gagal! Anda sudah memiliki data absensi/pengajuan pada rentang tanggal tersebut (' . $existing->tanggal . ').'
             ], 422);
         }
 
+        // 2. Upload Lampiran (satu file untuk semua hari dalam rentang tsb)
         $lampiranPath = null;
         if ($request->hasFile('lampiran')) {
             $lampiranPath = $request->file('lampiran')->store('lampiran_absen', 'public');
         }
 
-        $absensi = Absensi::create([
-            'user_id'           => $user->id,
-            'tanggal'           => $today,
-            'status_kehadiran'  => $request->status_kehadiran,
-            'status_approval'   => 'pending', 
-            'keterangan_pulang' => $request->keterangan, 
-            'lampiran'          => $lampiranPath,
-            'status_kedatangan' => $request->status_kehadiran, 
-        ]);
+        // 3. Loop untuk membuat record per hari
+        $currentDate = $start->copy();
+        $insertedData = [];
+
+        while ($currentDate->lte($end)) {
+            // Skip hari Sabtu dan Minggu jika kantor libur (Opsional)
+            // if ($currentDate->isWeekend()) {
+            //     $currentDate->addDay();
+            //     continue;
+            // }
+
+            $absensi = Absensi::create([
+                'user_id'           => $user->id,
+                'tanggal'           => $currentDate->toDateString(),
+                'status_kehadiran'  => $request->status_kehadiran,
+                'status_approval'   => 'pending',
+                'keterangan_pulang' => $request->keterangan, // Menyimpan alasan izin
+                'lampiran'          => $lampiranPath,
+                'status_kedatangan' => $request->status_kehadiran,
+            ]);
+
+            $insertedData[] = $absensi;
+            $currentDate->addDay();
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Pengajuan ' . $request->status_kehadiran . ' berhasil dikirim, menunggu persetujuan admin.',
-            'data'    => $absensi
+            'message' => 'Pengajuan ' . $request->status_kehadiran . ' untuk ' . count($insertedData) . ' hari berhasil dikirim.',
+            'data'    => $insertedData
         ]);
     }
 
@@ -377,20 +375,29 @@ class AttendanceController extends Controller
     // Web Admin: Aksi Approve/Reject
     // POST /admin/absensi/approve/{id}
     // -------------------------------------------------------
-    public function approveReject(Request $request, $id)
+    // -------------------------------------------------------
+    // Web Admin: Aksi Approve/Reject (Mendukung Massal)
+    // POST /admin/absensi/approve-batch
+    // -------------------------------------------------------
+    public function approveReject(Request $request)
     {
         $request->validate([
-            'status' => 'required|in:approved,rejected',
+            'ids'     => 'required|array', // Mengharuskan kiriman berupa array ID
+            'ids.*'   => 'exists:absensis,id',
+            'status'  => 'required|in:approved,rejected',
             'catatan' => 'nullable|string'
         ]);
 
-        $absensi = Absensi::findOrFail($id);
-        $absensi->update([
+        // Update semua data yang ID-nya ada di dalam array $request->ids
+        Absensi::whereIn('id', $request->ids)->update([
             'status_approval'  => $request->status,
-            'keterangan_admin' => $request->catatan
+            'keterangan_admin' => $request->catatan,
+            'updated_at'       => now()
         ]);
 
-        return back()->with('success', 'Status pengajuan berhasil diperbarui.');
+        $pesan = $request->status === 'approved' ? 'disetujui' : 'ditolak';
+
+        return back()->with('success', "Total " . count($request->ids) . " pengajuan berhasil $pesan.");
     }
 
     // Update fungsi summary agar hanya menghitung yang Approved
