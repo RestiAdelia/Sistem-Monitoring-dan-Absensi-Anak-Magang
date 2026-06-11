@@ -44,25 +44,25 @@ class AttendanceController extends Controller
     // Mobile API: Ringkasan absensi bulan ini
     // GET /api/absen/summary
     // -------------------------------------------------------
-    public function summary()
-    {
-        $user  = Auth::user();
-        $month = Carbon::now()->month;
-        $year  = Carbon::now()->year;
+    // public function summary()
+    // {
+    //     $user  = Auth::user();
+    //     $month = Carbon::now()->month;
+    //     $year  = Carbon::now()->year;
 
-        $records = Absensi::where('user_id', $user->id)
-            ->whereMonth('tanggal', $month)
-            ->whereYear('tanggal', $year)
-            ->get();
+    //     $records = Absensi::where('user_id', $user->id)
+    //         ->whereMonth('tanggal', $month)
+    //         ->whereYear('tanggal', $year)
+    //         ->get();
 
-        return response()->json([
-            'success'   => true,
-            'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
-            // 'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
-            // 'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
-            'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
-        ]);
-    }
+    //     return response()->json([
+    //         'success'   => true,
+    //         'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
+    //         // 'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
+    //         // 'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
+    //         'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
+    //     ]);
+   // }
 
     // -------------------------------------------------------
     // Mobile API: Submit absensi (masuk / pulang)
@@ -194,7 +194,6 @@ class AttendanceController extends Controller
                     : 'Absen pulang berhasil direkam.',
                 'data'    => $existingAbsensi->fresh(),
             ]);
-
         } else {
             $statusKedatangan = $this->resolveStatusKedatangan(
                 $validated['status_kehadiran'],
@@ -306,9 +305,113 @@ class AttendanceController extends Controller
 
         $angle = 2 * asin(sqrt(
             pow(sin($latDelta / 2), 2) +
-            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)
+                cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)
         ));
 
         return $angle * $earthRadius;
+    }
+    // -------------------------------------------------------
+    // Mobile API: Pengajuan Izin atau Sakit
+    // POST /api/absen/pengajuan
+    // -------------------------------------------------------
+    public function submitPengajuan(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'status_kehadiran' => 'required|in:Izin,Sakit',
+            'keterangan'       => 'required|string|min:10',
+            'lampiran'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB
+        ]);
+
+        $today = Carbon::today()->toDateString();
+
+        // Cek apakah sudah ada absen/pengajuan hari ini
+        $existing = Absensi::where('user_id', $user->id)->where('tanggal', $today)->first();
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah melakukan presensi atau pengajuan hari ini.'
+            ], 422);
+        }
+
+        $lampiranPath = null;
+        if ($request->hasFile('lampiran')) {
+            $lampiranPath = $request->file('lampiran')->store('lampiran_absen', 'public');
+        }
+
+        $absensi = Absensi::create([
+            'user_id'           => $user->id,
+            'tanggal'           => $today,
+            'status_kehadiran'  => $request->status_kehadiran,
+            'status_approval'   => 'pending', 
+            'keterangan_pulang' => $request->keterangan, 
+            'lampiran'          => $lampiranPath,
+            'status_kedatangan' => $request->status_kehadiran, 
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengajuan ' . $request->status_kehadiran . ' berhasil dikirim, menunggu persetujuan admin.',
+            'data'    => $absensi
+        ]);
+    }
+
+    // -------------------------------------------------------
+    // Web Admin: List Pengajuan yang Pending
+    // GET /admin/absensi/persetujuan
+    // -------------------------------------------------------
+    public function pendingApprovals()
+    {
+        if (Auth::user()->role !== 'admin') abort(403);
+
+        $pendingList = Absensi::with('user')
+            ->where('status_approval', 'pending')
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        return view('admin.absensi.persetujuan', compact('pendingList'));
+    }
+
+    // -------------------------------------------------------
+    // Web Admin: Aksi Approve/Reject
+    // POST /admin/absensi/approve/{id}
+    // -------------------------------------------------------
+    public function approveReject(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+            'catatan' => 'nullable|string'
+        ]);
+
+        $absensi = Absensi::findOrFail($id);
+        $absensi->update([
+            'status_approval'  => $request->status,
+            'keterangan_admin' => $request->catatan
+        ]);
+
+        return back()->with('success', 'Status pengajuan berhasil diperbarui.');
+    }
+
+    // Update fungsi summary agar hanya menghitung yang Approved
+    public function summary()
+    {
+        $user  = Auth::user();
+        $month = Carbon::now()->month;
+        $year  = Carbon::now()->year;
+
+        $records = Absensi::where('user_id', $user->id)
+            ->whereMonth('tanggal', $month)
+            ->whereYear('tanggal', $year)
+            ->where('status_approval', 'approved') // Hanya yang disetujui
+            ->get();
+
+        return response()->json([
+            'success'   => true,
+            'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
+            'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
+            'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
+            'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
+        ]);
     }
 }
