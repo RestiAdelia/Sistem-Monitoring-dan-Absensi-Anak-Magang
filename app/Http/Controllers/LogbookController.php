@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Logbook;
+use App\Models\User;
+use App\Models\DataAnakMagang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,6 +17,7 @@ class LogbookController extends Controller
     public function submitLogbook(Request $request)
     {
         $user = Auth::user();
+        $user->load('DataAnakMagang'); // Pastikan relasi DataAnakMagang sudah dimuat
         if ($user->role !== 'magang') {
             return response()->json([
                 'success' => false,
@@ -66,21 +69,47 @@ class LogbookController extends Controller
     /**
      * Web Dashboard: View pending logs, approve, or reject them.
      */
-    public function index()
+
+   public function index()
+{
+    $mentor = Auth::user();
+    if ($mentor->role !== 'mentor') abort(403);
+
+    // Kita filter berdasarkan relasi 'dataMagang'
+    $interns = $mentor->interns()
+        ->whereHas('dataMagang', function ($query) {
+            // Gunakan kolom 'status_magang' dari tabel data_anak_magang
+            $query->where('status_magang', 'berjalan');
+        })
+        ->with('dataMagang') // Memuat relasi agar tidak query berkali-kali
+        ->withCount('logbooks')
+        ->paginate(10);
+
+    return view('mentor.logbooks.index', compact('interns'));
+}
+    public function showInternLogbooks(Request $request, $userId)
     {
         $mentor = Auth::user();
-        if ($mentor->role !== 'mentor') {
-            abort(403, 'Unauthorized');
+        $intern = User::findOrFail($userId);
+
+        if ($mentor->role !== 'mentor' || $intern->mentor_id != $mentor->id) {
+            abort(403, 'Anda tidak berhak melihat data ini.');
         }
 
-        $internIds = $mentor->interns()->pluck('id');
+        $query = Logbook::where('user_id', $userId);
 
-        $logbooks = Logbook::whereIn('user_id', $internIds)
-            ->with('user')
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        // Filter: Tanggal spesifik atau 7 hari terakhir
+        if ($request->filled('tanggal')) {
+            $query->where('tanggal', $request->tanggal);
+        } else {
+            $query->where('tanggal', '>=', now()->subDays(7));
+        }
 
-        return view('mentor.logbooks.index', compact('logbooks'));
+        $logbooks = $query->orderBy('tanggal', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('mentor.logbooks.show', compact('logbooks', 'intern'));
     }
 
     /**
@@ -108,20 +137,26 @@ class LogbookController extends Controller
         return redirect()->route('mentor.logbooks.index')->with('success', 'Status logbook berhasil diperbarui.');
     }
 
-    public function getLogbooks()
+    public function getLogbooks(Request $request)
     {
         $user = Auth::user();
         if ($user->role !== 'magang') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Hanya anak magang yang dapat melihat logbook.'
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        // Ambil logbook urut dari yang terbaru
-        $logbooks = Logbook::where('user_id', $user->id)
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        $query = Logbook::where('user_id', $user->id);
+
+        // Cek apakah ada request tanggal untuk pencarian
+        if ($request->has('tanggal') && !empty($request->tanggal)) {
+            $query->where('tanggal', $request->tanggal);
+        } else {
+            // Jika tidak ada pencarian, tampilkan 7 hari terakhir
+            $query->where('tanggal', '>=', now()->subDays(7));
+        }
+        // MENGURUTKAN DATA:
+        $logbooks = $query->orderBy('tanggal', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(7);
 
         return response()->json([
             'success' => true,

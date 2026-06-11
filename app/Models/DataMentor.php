@@ -25,7 +25,12 @@ class DataMentor extends Model
        
         'nama',
         'bidang',
-        'status_akun'
+        'status_akun',
+        'no_hp',
+        'email',
+        'jk',
+        'status',
+        'foto',
     ];
 
     // ──────────────────────────────────────────────

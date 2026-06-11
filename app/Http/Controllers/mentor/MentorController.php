@@ -18,7 +18,7 @@ class MentorController extends Controller
             ->where('mentor_id', $mentor->id)
             ->count();
 
-        // 2. Today's Attendance for these interns
+        // 2. Today's Attendance count for these interns
         $internIds = User::where('role', 'magang')
             ->where('mentor_id', $mentor->id)
             ->pluck('id');
@@ -37,20 +37,19 @@ class MentorController extends Controller
             ->whereNull('nilai')
             ->count();
 
-        // 5. Recent Attendance (Last 5)
+        // 5. Today's Attendance (Hanya yang melakukan absensi HARI INI)
         $recentAttendance = \App\Models\Absensi::whereIn('user_id', $internIds)
+            ->whereDate('tanggal', today()) // <-- Membatasi hanya hari ini
             ->with('user')
-            ->orderBy('tanggal', 'desc')
             ->orderBy('jam_masuk', 'desc')
-            ->limit(5)
-            ->get();
+            ->get(); // Diubah ke .get() tanpa limit agar semua yang absen hari ini kelihatan
 
-        // 6. Recent Logbooks (Last 5)
+        // 6. Today's Logbooks (Hanya logbook yang dikirim HARI INI)
         $recentLogbooks = \App\Models\Logbook::whereIn('user_id', $internIds)
+            ->whereDate('tanggal', today()) // <-- Membatasi hanya hari ini
             ->with('user')
-            ->orderBy('tanggal', 'desc')
-            ->limit(5)
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->get(); // Diubah ke .get() tanpa limit agar semua logbook hari ini kelihatan
 
         return view('mentor.dashboard', compact(
             'internsCount',

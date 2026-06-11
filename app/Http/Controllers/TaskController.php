@@ -122,6 +122,32 @@ class TaskController extends Controller
 
         return redirect()->route('mentor.tasks.index')->with('success', 'Dokumen tugas berhasil diperbarui.');
     }
+    public function showTaskDetail(Request $request, $id)
+    {
+        $mentor = Auth::user();
+
+        // 1. Pastikan tugas ditemukan dan milik mentor yang sedang login
+        $task = Tugas::where('mentor_id', $mentor->id)->findOrFail($id);
+
+        // 2. Inisialisasi query pengumpulan tugas berdasarkan tugas_id tersebut
+        $query = PengumpulanTugas::where('tugas_id', $task->id)->with('user');
+
+        // 3. Logika Filter Status Penilaian
+        if ($request->has('filter_nilai')) {
+            if ($request->filter_nilai === 'belum') {
+                $query->whereNull('nilai');
+            } elseif ($request->filter_nilai === 'sudah') {
+                $query->whereNotNull('nilai');
+            }
+        }
+
+        // 4. Urutkan dari yang terbaru mengumpulkan (paling atas) dan batasi dengan Paginate
+        $submissions = $query->orderBy('waktu_kumpul', 'desc')
+            ->paginate(10); // Menampilkan 10 data per halaman
+
+        // 5. Kirim data ke view mentor.tasks.show
+        return view('mentor.tasks.show', compact('task', 'submissions'));
+    }
 
     /**
      * Web View: Delete a task along with its materials.
@@ -142,7 +168,35 @@ class TaskController extends Controller
 
         return redirect()->route('mentor.tasks.index')->with('success', 'Tugas bimbingan berhasil dihapus secara permanen dari sistem.');
     }
+    /**
+     * Web View: Show details of a task along with all submissions.
+     */
+    public function show(Request $request, $id)
+    {
+        $mentor = Auth::user();
 
+        // 1. Pastikan tugas ditemukan dan milik mentor yang sedang login
+        $task = Tugas::where('mentor_id', $mentor->id)->findOrFail($id);
+
+        // 2. Inisialisasi query pengumpulan tugas berdasarkan tugas_id tersebut
+        $query = PengumpulanTugas::where('tugas_id', $task->id)->with('user');
+
+        // 3. Logika Filter Status Penilaian
+        if ($request->has('filter_nilai')) {
+            if ($request->filter_nilai === 'belum') {
+                $query->whereNull('nilai');
+            } elseif ($request->filter_nilai === 'sudah') {
+                $query->whereNotNull('nilai');
+            }
+        }
+
+        // 4. Urutkan dari yang terbaru mengumpulkan (paling atas) dan batasi dengan Paginate
+        $submissions = $query->orderBy('waktu_kumpul', 'desc')
+            ->paginate(10); // Menampilkan 10 data per halaman
+
+        // 5. Kirim data ke view mentor.tasks.show
+        return view('mentor.tasks.show', compact('task', 'submissions'));
+    }   
     /**
      * Web View: Grade an intern's submission.
      */
@@ -153,7 +207,6 @@ class TaskController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // Verify if submission belongs to an intern of this mentor
         if ($submission->user->mentor_id !== $mentor->id) {
             abort(403, 'Anda tidak berhak memberikan nilai untuk pengumpulan ini.');
         }
@@ -190,14 +243,12 @@ class TaskController extends Controller
         }
 
         // Retrieve tasks from the intern's mentor
-        $tasks = Tugas::where('mentor_id', $user->mentor_id)->get()->map(function($task) use ($user) {
+        $tasks = Tugas::where('mentor_id', $user->mentor_id)->get()->map(function ($task) use ($user) {
             $submission = PengumpulanTugas::where('tugas_id', $task->id)
                 ->where('user_id', $user->id)
                 ->first();
 
             $task->is_submitted = !empty($submission);
-            // 🔥 MASALAHNYA DI SINI:
-            // Laravel memasukkan seluruh data pengumpulan ke dalam sub-objek 'submission'.
             $task->submission = $submission;
             return $task;
         });
@@ -223,7 +274,6 @@ class TaskController extends Controller
 
         $task = Tugas::findOrFail($id);
 
-        // Check if task deadline has passed
         if (Carbon::now()->greaterThan($task->deadline)) {
             return response()->json([
                 'success' => false,

@@ -73,23 +73,23 @@
                     </div>
                 </div>
 
-                <!-- Card 4 -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-b-4 border-b-violet-600">
+                <!-- Card 4 hilangkan bagian ini karena dashbaord hanya untuk hari ini  -->
+                <!-- <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-b-4 border-b-violet-600">
                     <div>
                         <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rekap Bulan Ini</p>
-                        <h3 class="text-2xl font-black text-slate-800 mt-1 tracking-tight">{{ $thisMonthAttendance }}</h3>
+                        <h3 class="text-2xl font-black text-slate-800 mt-1 tracking-tight">{{ $todayAttendance }}</h3>
                     </div>
                     <div class="p-2.5 bg-slate-50 text-slate-500 rounded-xl border border-slate-100 group-hover:bg-violet-600 group-hover:text-white group-hover:border-violet-600 transition-colors duration-200 shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <!-- DETAIL STATISTIK PIE RINGKASAN STATUS PRESENSI -->
             <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
                 <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
-                    Ringkasan Kehadiran Bulan Ini
+                    Ringkasan Kehadiran Hari Ini
                 </h2>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div class="bg-slate-50/50 rounded-xl p-3.5 border border-slate-100 text-center">

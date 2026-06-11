@@ -29,6 +29,9 @@ class DataAnakMagang extends Model
         'tanggal_selesai_magang',
         'mentor_id',
         'status_akun',
+        'bidang',
+        'jk',
+        'status_magang',    
     ];
 
     /**

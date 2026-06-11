@@ -76,10 +76,15 @@ Route::middleware(['auth', 'role:mentor'])->prefix('mentor')->name('mentor.')->g
     Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
 
     Route::get('logbooks', [LogbookController::class, 'index'])->name('logbooks.index');
+    Route::get('logbooks/{userId}', [LogbookController::class, 'showInternLogbooks'])->name('logbooks.show');   
+    Route::patch('/logbooks/{logbook}', [LogbookController::class, 'updateStatus'])
+            ->name('logbooks.update');
     Route::post('logbooks/{logbook}/status', [LogbookController::class, 'updateStatus'])->name('logbooks.update-status');
 
     Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('tasks/create', [TaskController::class, 'create'])->name('tasks.create');
+    Route::get('/tasks/{id}', [TaskController::class, 'show'])->name('tasks.show'); 
+    Route::get('tasks/{id}/detail', [TaskController::class, 'showTaskDetail'])->name('tasks.showTaskDetail');
     Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
     Route::post('tasks/{submission}/grade', [TaskController::class, 'gradeSubmission'])->name('tasks.grade');
     Route::get('/tasks/{task}/edit', [TaskController::class, 'edit'])->name('tasks.edit');

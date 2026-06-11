@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DataMentor;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class MentorDataController extends Controller
@@ -13,76 +14,64 @@ class MentorDataController extends Controller
     /**
      * Halaman list data mentor
      */
-
     public function index()
     {
-        $mentors = DataMentor::orderBy('nama')->get();
+        // Menggunakan paginate(10) agar data tidak menumpuk
+        $mentors = DataMentor::orderBy('nama')->paginate(10);
         return view('admin.data-mentor.index', compact('mentors'));
     }
-    /**
-     * menapilkan form tambbah mentor 
-     */
 
-    public function create()
-    {
-        return view('admin.data-mentor.create');
-    }
-    /**
-     * Store data mentor baru ke database
-     */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-
-            'nama' => ['required', 'string', 'max:255'],
-            'bidang' => ['required', 'string', 'max:255'],
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'bidang' => 'required|string|max:255',
+            'no_hp' => 'nullable|string|max:15',
+            'email' => 'nullable|email',
+            'jk' => 'required|in:Laki-laki,Perempuan',
+            'status' => 'required|in:Aktif,Tidak Aktif',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $validator->validate();
+        $fotoPath = $request->hasFile('foto') ? $request->file('foto')->store('mentor_photos', 'public') : null;
 
-        $mentorData = DataMentor::create([
-            'nama' => $request->input('nama'),
-            'bidang' => $request->input('bidang'),
+        DataMentor::create([
+            'nama' => $request->nama,
+            'bidang' => $request->bidang,
+            'no_hp' => $request->no_hp,
+            'email' => $request->email,
+            'jk' => $request->jk,
+            'status' => $request->status,
+            'foto' => $fotoPath,
             'status_akun' => 'Belum Dibuat',
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Data mentor berhasil disimpan.',
-                'data' => $mentorData,
-            ], 201);
-        }
-
-        return redirect()->route('admin.data-mentor.index')->with('success', 'Data mentor berhasil disimpan.');
-    }
-    public function edit(DataMentor $data_mentor)
-    {
-        return view('admin.data-mentor.edit', compact('data_mentor'));
+        return redirect()->route('admin.data-mentor.index')->with('success', 'Mentor berhasil ditambahkan.');
     }
 
-    /**
-     * Update data mentor di database
-     */
     public function update(Request $request, DataMentor $data_mentor)
     {
         $request->validate([
-            'nama' => ['required', 'string', 'max:255'],
-            'bidang' => ['required', 'string', 'max:255'],
+            'nama' => 'required|string|max:255',
+            'bidang' => 'required|string|max:255',
+            'no_hp' => 'nullable|string|max:15',
+            'email' => 'nullable|email',
+            'jk' => 'required|in:Laki-laki,Perempuan',
+            'status' => 'required|in:Aktif,Tidak Aktif',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $data_mentor->update([
-            'nama' => $request->nama,
-            'bidang' => $request->bidang,
-        ]);
+        $data = $request->only(['nama', 'bidang', 'no_hp', 'email', 'jk', 'status']);
 
-        // Opsional: Jika akun user sudah ada, update juga nama di tabel users
-        User::where('data_mentor_id', $data_mentor->id)->update([
-            'name' => $request->nama
-        ]);
+        if ($request->hasFile('foto')) {
+            if ($data_mentor->foto) Storage::disk('public')->delete($data_mentor->foto);
+            $data['foto'] = $request->file('foto')->store('mentor_photos', 'public');
+        }
 
-        return redirect()->route('admin.data-mentor.index')->with('success', 'Data mentor berhasil diperbarui.');
+        $data_mentor->update($data);
+
+        return redirect()->route('admin.data-mentor.index')->with('success', 'Data berhasil diperbarui.');
     }
-
     /**
      * Hapus data mentor
      */
@@ -96,4 +85,9 @@ class MentorDataController extends Controller
         $data_mentor->delete();
         return redirect()->route('admin.data-mentor.index')->with('success', 'Data mentor berhasil dihapus.');
     }
+    public function show(DataMentor $data_mentor)
+    {
+        return view('admin.data-mentor.show', compact('data_mentor'));
+    }
+
 }
