@@ -20,7 +20,6 @@
                 <div class="px-6 py-5 border-b border-slate-100 bg-white">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div class="flex items-center space-x-3">
-                            <!-- Mengubah bg menjadi blue-50 dan teks menjadi blue-600 -->
                             <div class="p-2 bg-blue-50 text-blue-600 rounded-xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11a5 5 0 00-10 0c0 1.02.14 2 .4 2.937m14.004-4.544a4.978 4.978 0 00-2.56-2.56M12 11a4.978 4.978 0 012.56 2.56M20 11a5 5 0 01-10 0c0-1.02.14-2 .4-2.937" />
@@ -60,6 +59,8 @@
                     <table class="min-w-full border-collapse text-left">
                         <thead>
                             <tr class="bg-slate-50/70 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <!-- TAMBAHAN: Kolom Header No -->
+                                <th class="px-6 py-4 text-center w-12">No.</th>
                                 <th class="px-6 py-4">Tanggal</th>
                                 <th class="px-6 py-4">Anak Magang</th>
                                 <th class="px-6 py-4">Jam Masuk</th>
@@ -75,6 +76,11 @@
                                             '{{ strtolower($absen->user->nomor_induk) }}'.includes(search.toLowerCase()) ||
                                             '{{ strtolower($absen->tanggal->format('d M Y')) }}'.includes(search.toLowerCase())">
 
+                                    <!-- TAMBAHAN: Data No Otomatis -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-slate-400 font-medium font-mono text-xs">
+                                        {{ $loop->iteration }}
+                                    </td>
+
                                     <!-- Tanggal -->
                                     <td class="px-6 py-4 whitespace-nowrap text-slate-600 font-semibold font-mono text-xs">
                                         {{ $absen->tanggal->format('d M Y') }}
@@ -83,7 +89,6 @@
                                     <!-- Info Anak Magang -->
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
-                                            <!-- Avatar Inisial: Diubah menjadi nuansa biru premium dari-blue-50 ke-indigo-50 -->
                                             <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-50 to-indigo-50 border border-blue-100/40 flex items-center justify-center text-blue-600 font-extrabold text-sm shadow-sm shrink-0">
                                                 {{ substr($absen->user->name, 0, 1) }}
                                             </div>
@@ -114,7 +119,7 @@
                                                 </svg>
                                                 <span class="font-mono text-[11px]">{{ round($absen->latitude_masuk, 4) }}, {{ round($absen->longitude_masuk, 4) }}</span>
                                             </a>
-                                        @else
+                                        @_else
                                             <span class="text-slate-300 font-mono pl-1">-</span>
                                         @endif
                                     </td>
@@ -122,7 +127,6 @@
                                     <!-- Status Kehadiran Terkalibrasi -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center pr-8">
                                         @if($absen->status_kehadiran === 'Hadir')
-                                            <!-- Badge Hadir disesuaikan ke tema biru yang cerah -->
                                             <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide bg-blue-50 text-blue-700 border border-blue-200/50">
                                                 Hadir
                                             </span>
@@ -142,9 +146,9 @@
                                     </td>
                                 </tr>
                             @empty
-                                <!-- Empty State Meniru Persis Halaman Bimbingan -->
+                                <!-- Empty State (colspan diubah dari 6 menjadi 7 karena ada kolom No) -->
                                 <tr>
-                                    <td colspan="6" class="px-6 py-16 text-center bg-white">
+                                    <td colspan="7" class="px-6 py-16 text-center bg-white">
                                         <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
                                             <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-slate-400 mb-3.5 shadow-inner">
                                                 <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
