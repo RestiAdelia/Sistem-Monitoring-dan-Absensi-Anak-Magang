@@ -24,6 +24,11 @@ class Absensi extends Model
         'status_kedatangan',
         'status',
         'keterangan_pulang',
+        'status_approval',
+        'tanggal_mulai',
+        'tanggal_selesai',
+        'lampiran',
+        'keterangan_admin',
     ];
 
     protected $casts = [
