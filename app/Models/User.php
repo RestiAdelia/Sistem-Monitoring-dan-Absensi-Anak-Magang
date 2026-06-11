@@ -66,6 +66,8 @@ class User extends Authenticatable
     {
         return $this->belongsTo(DataAnakMagang::class, 'data_magang_id');
     }
+// App\Models\User.php
+
 
     /**
      * A mentor user belongs to one DataMentor record.

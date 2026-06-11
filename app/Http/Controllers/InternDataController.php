@@ -16,7 +16,16 @@ class InternDataController extends Controller
      */
     public function index()
     {
-        $interns = DataAnakMagang::with('mentor')->orderBy('nama')->get();
+        $interns = DataAnakMagang::with('mentor')
+            ->orderByRaw("CASE 
+            WHEN status_magang = 'Pending' THEN 1 
+            WHEN status_magang = 'Berjalan' THEN 2 
+            WHEN status_magang = 'Selesai' THEN 3 
+            ELSE 4 
+        END ASC")
+            ->orderBy('nama', 'asc') 
+            ->paginate(10);
+
         return view('admin.data-anak-magang.index', compact('interns'));
     }
 
@@ -32,21 +41,46 @@ class InternDataController extends Controller
     /**
      * Store a new intern raw data record.
      */
+
     public function store(Request $request)
     {
         $this->validateIntern($request);
 
         DataAnakMagang::create([
-            'nim_nisn' => $request->input('nim_nisn'),
-            'nama' => $request->input('nama'),
-            'instansi' => $request->input('instansi'),
-            'tanggal_mulai_magang' => $request->input('tanggal_mulai_magang'),
-            'tanggal_selesai_magang' => $request->input('tanggal_selesai_magang'),
-            'mentor_id' => $request->input('mentor_id'),
+            'nim_nisn' => $request->nim_nisn,
+            'nama' => $request->nama,
+            'bidang' => $request->bidang,
+            'jk' => $request->jk,
+            'status_magang' => $request->status_magang ?? 'Berjalan',
+            'instansi' => $request->instansi,
+            'tanggal_mulai_magang' => $request->tanggal_mulai_magang,
+            'tanggal_selesai_magang' => $request->tanggal_selesai_magang,
+            'mentor_id' => $request->mentor_id,
             'status_akun' => 'Belum Dibuat',
         ]);
 
-        return redirect()->route('admin.data-anak-magang.index')->with('success', 'Data anak magang berhasil disimpan.');
+        return redirect()->route('admin.data-anak-magang.index')->with('success', 'Data berhasil disimpan.');
+    }
+
+    // Update method update
+    public function update(Request $request, $id)
+    {
+        $intern = DataAnakMagang::findOrFail($id);
+        $this->validateIntern($request, $id);
+
+        $intern->update([
+            'nim_nisn' => $request->nim_nisn,
+            'nama' => $request->nama,
+            'bidang' => $request->bidang,
+            'jk' => $request->jk,
+            'status_magang' => $request->status_magang,
+            'instansi' => $request->instansi,
+            'tanggal_mulai_magang' => $request->tanggal_mulai_magang,
+            'tanggal_selesai_magang' => $request->tanggal_selesai_magang,
+            'mentor_id' => $request->mentor_id,
+        ]);
+
+        return redirect()->route('admin.data-anak-magang.index')->with('success', 'Data berhasil diperbarui.');
     }
 
     /**
@@ -59,36 +93,6 @@ class InternDataController extends Controller
         return view('admin.data-anak-magang.edit', compact('intern', 'mentors'));
     }
 
-    /**
-     * Update the specified intern in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        $intern = DataAnakMagang::findOrFail($id);
-
-        // Validasi khusus update (melewati ID dirinya sendiri)
-        $this->validateIntern($request, $id);
-
-        $intern->update([
-            'nim_nisn' => $request->input('nim_nisn'),
-            'nama' => $request->input('nama'),
-            'instansi' => $request->input('instansi'),
-            'tanggal_mulai_magang' => $request->input('tanggal_mulai_magang'),
-            'tanggal_selesai_magang' => $request->input('tanggal_selesai_magang'),
-            'mentor_id' => $request->input('mentor_id'),
-        ]);
-
-        // Opsional: Update nama di tabel users jika akun sudah dibuat
-        if ($intern->status_akun === 'Aktif') {
-            User::where('data_magang_id', $intern->id)->update([
-                'name' => $intern->nama,
-                'mentor_id' => $intern->mentor_id,
-                'nomor_induk' => $intern->nim_nisn
-            ]);
-        }
-
-        return redirect()->route('admin.data-anak-magang.index')->with('success', 'Data anak magang berhasil diperbarui.');
-    }
 
     /**
      * Remove the specified intern from storage.
@@ -114,12 +118,14 @@ class InternDataController extends Controller
         $validator = Validator::make($request->all(), [
             'nim_nisn' => ['required', 'string', 'max:255'],
             'nama' => ['required', 'string', 'max:255'],
+            'bidang' => ['required', 'string', 'max:255'],
+            'jk' => ['required', 'in:Laki-laki,Perempuan'],
+            'status_magang' => ['required', 'in:Berjalan,Selesai,Diberhentikan'],
             'instansi' => ['required', 'string', 'max:255'],
             'tanggal_mulai_magang' => ['required', 'date'],
             'tanggal_selesai_magang' => ['required', 'date', 'after_or_equal:tanggal_mulai_magang'],
             'mentor_id' => ['required', 'integer', 'exists:users,id'],
         ]);
-
         $validator->after(function ($validator) use ($request, $id) {
             $instansi = $request->input('instansi');
             $startDate = $request->input('tanggal_mulai_magang');
@@ -132,7 +138,6 @@ class InternDataController extends Controller
                         ->where('tanggal_selesai_magang', '>=', $startDate);
                 });
 
-            // Jika sedang update, jangan hitung ID diri sendiri
             if ($id) {
                 $query->where('id', '!=', $id);
             }
