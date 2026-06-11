@@ -68,6 +68,7 @@
                     <table class="min-w-full border-collapse text-left">
                         <thead>
                             <tr class="bg-slate-50/70 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <th class="px-6 py-4 text-center w-12">No</th>
                                 <th class="px-6 py-4">Nama Lengkap / NIM</th>
                                 <th class="px-6 py-4">Instansi</th>
                                 <th class="px-6 py-4">Periode Magang</th>
@@ -81,6 +82,10 @@
                                     x-show="'{{ strtolower($intern->name) }}'.includes(search.toLowerCase()) ||
                                             '{{ strtolower($intern->nomor_induk) }}'.includes(search.toLowerCase()) ||
                                             '{{ strtolower($intern->dataMagang->instansi ?? '') }}'.includes(search.toLowerCase())">
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-slate-400 font-semibold text-xs">
+                                        {{ $loop->iteration }}
+                                    </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
@@ -148,7 +153,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-16 text-center bg-white">
+                                    <td colspan="6" class="px-6 py-16 text-center bg-white">
                                         <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
                                             <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-slate-400 mb-3.5 shadow-inner">
                                                 <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
