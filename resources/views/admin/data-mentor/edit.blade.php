@@ -40,11 +40,12 @@
                     </div>
                 @endif
 
-                <form action="{{ route('admin.data-mentor.update', $data_mentor->id) }}" method="POST">
+                <form action="{{ route('admin.data-mentor.update', $data_mentor->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
                     <div class="space-y-5">
+
                         <div>
                             <label for="nama" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
                             <input type="text" id="nama" name="nama" value="{{ old('nama', $data_mentor->nama) }}" required placeholder="Nama lengkap pembimbing lapangan beserta gelar" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200" />
@@ -54,11 +55,62 @@
                             <label for="bidang" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Bidang / Spesialisasi Kompetensi</label>
                             <input type="text" id="bidang" name="bidang" value="{{ old('bidang', $data_mentor->bidang) }}" required placeholder="Contoh: Web Developer, UI/UX Designer, HRD" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200" />
                         </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Alamat Email Resmi</label>
+                                <input id="email" type="email" name="email" value="{{ old('email', $data_mentor->email) }}" placeholder="Contoh: mentor@gmail.com" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200" />
+                            </div>
+                            <div>
+                                <label for="no_hp" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">No. HP / WhatsApp</label>
+                                <input id="no_hp" type="text" name="no_hp" value="{{ old('no_hp', $data_mentor->no_hp) }}" placeholder="Contoh: 081234567890" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="jk" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Jenis Kelamin</label>
+                                <select id="jk" name="jk" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 cursor-pointer text-slate-600 font-medium">
+                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                    <option value="Laki-laki" {{ old('jk', $data_mentor->jk) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                                    <option value="Perempuan" {{ old('jk', $data_mentor->jk) == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="status" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Status Aktif Mentor</label>
+                                <select id="status" name="status" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 cursor-pointer text-slate-600 font-medium">
+                                    <option value="Aktif" {{ old('status', $data_mentor->status) == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                                    <option value="Tidak Aktif" {{ old('status', $data_mentor->status) == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Foto Profile Resmi</label>
+                            <div class="flex flex-col sm:flex-row items-center gap-4 p-4 bg-slate-50/50 border border-slate-200 rounded-xl">
+                                <div class="shrink-0 text-center">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Foto Saat Ini</p>
+                                    @if($data_mentor->foto)
+                                        <img src="{{ asset('storage/' . $data_mentor->foto) }}" alt="Foto {{ $data_mentor->nama }}" class="h-16 w-16 rounded-xl object-cover border border-slate-200 shadow-sm mx-auto">
+                                    @else
+                                        <div class="h-16 w-16 rounded-xl bg-slate-200 flex items-center justify-center text-slate-400 font-extrabold text-sm mx-auto uppercase">
+                                            {{ substr($data_mentor->nama, 0, 2) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="flex-1 w-full">
+                                    <div class="flex text-xs text-slate-600">
+                                        <input id="foto" name="foto" type="file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" />
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 font-medium mt-1.5">Pilih file baru jika ingin mengganti foto profile (Format: JPG, JPEG, PNG maks 2MB).</p>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="mt-8 flex items-center justify-end gap-4 border-t border-slate-100 pt-5">
-                        <a href="{{ route('admin.data-mentor.index') }}"
-                            class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors duration-150">
+                        <a href="{{ route('admin.data-mentor.index') }}" class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors duration-150">
                             Batal
                         </a>
                         <button type="submit" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-indigo-700 active:scale-[0.98] transition-all duration-200 shadow-md shadow-indigo-100 hover:shadow-lg">

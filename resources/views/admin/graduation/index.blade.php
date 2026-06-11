@@ -5,7 +5,7 @@
                 <h2 class="font-extrabold text-2xl text-slate-800 tracking-tight leading-tight">
                     {{ __('Penerbitan Sertifikat Kelulusan') }}
                 </h2>
-                <p class="text-xs text-slate-500 mt-1">Validasi kelayakan nilai akhir, pemantauan berkas kelulusan, dan manajemen penerbitan sertifikat.</p>
+                <p class="text-xs text-slate-500 mt-1">Validasi kelayakan nilai akhir, pemantauan berkas kelulusan, and manajemen penerbitan sertifikat.</p>
             </div>
         </div>
     </x-slot>
@@ -69,27 +69,32 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto border border-slate-300 rounded-b-2xl bg-white">
                     <table class="min-w-full border-collapse text-left">
                         <thead>
-                            <tr class="bg-slate-50/70 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            <tr class="bg-slate-100 border-b border-slate-300 text-xs font-bold uppercase tracking-wider text-slate-700 divide-x divide-slate-300">
+                                <th class="px-6 py-4 w-12 text-center">No</th>
                                 <th class="px-6 py-4">Nama / Instansi</th>
                                 <th class="px-6 py-4">Mentor</th>
-                                <th class="px-6 py-4 text-center">Nilai Akhir</th>
-                                <th class="px-6 py-4">Status Sertifikat</th>
+                                <th class="px-6 py-4 text-center w-28">Nilai Akhir</th>
+                                <th class="px-6 py-4 w-44">Status Sertifikat</th>
                                 <th class="px-6 py-4 text-right pr-8">Aksi Unggah Berkas PDF (Maks 10MB)</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse($interns as $intern)
-                                <tr class="hover:bg-slate-50/50 transition-colors duration-150 text-sm"
-                                    x-show="'{{ strtolower($intern->name) }}'.includes(search.toLowerCase()) ||
-                                            '{{ strtolower($intern->nomor_induk) }}'.includes(search.toLowerCase())">
+                        <tbody class="divide-y divide-slate-300">
+                            @forelse($interns as $index => $intern)
+                                <tr class="hover:bg-slate-50 transition-colors duration-150 text-sm divide-x divide-slate-200"
+                                    x-show="'{{ strtolower($intern->name ?? '') }}'.includes(search.toLowerCase()) ||
+                                            '{{ strtolower($intern->nomor_induk ?? '') }}'.includes(search.toLowerCase())">
+
+                                    <td class="px-6 py-4 font-mono text-slate-500 text-center text-xs whitespace-nowrap bg-slate-50/50">
+                                        {{ $interns->firstItem() + $index }}
+                                    </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="font-semibold text-slate-800">{{ $intern->name }}</div>
+                                        <div class="font-bold text-slate-800">{{ $intern->name }}</div>
                                         <div class="text-xs text-slate-400 mt-1 font-medium tracking-wide">
-                                            NIM. {{ $intern->nomor_induk }} <span class="text-slate-200mx-1">|</span> {{ $intern->dataMagang->instansi ?? $intern->instansi ?? '-' }}
+                                            NIM. {{ $intern->nomor_induk }} <span class="text-slate-200 mx-1">|</span> {{ $intern->dataMagang->instansi ?? $intern->instansi ?? '-' }}
                                         </div>
                                     </td>
 
@@ -136,7 +141,7 @@
                                                 </button>
                                             </form>
                                         @else
-                                            <span class="text-xs text-slate-400 font-medium italic flex items-center justify-end">
+                                            <span class="text-xs text-slate-400 font-medium italic inline-flex items-center justify-end">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
@@ -147,7 +152,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-10 text-center text-sm text-slate-400 italic bg-slate-50/20">
+                                    <td colspan="6" class="px-6 py-12 text-center text-sm text-slate-400 italic bg-slate-50/50 font-medium">
                                         Belum ada arsip data anak magang yang terdaftar di dalam sistem.
                                     </td>
                                 </tr>
@@ -156,6 +161,12 @@
                     </table>
                 </div>
             </div>
+
+            @if($interns->hasPages())
+                <div class="mt-4 p-4 bg-white border border-slate-300 rounded-2xl shadow-sm">
+                    {{ $interns->links() }}
+                </div>
+            @endif
 
         </div>
     </div>

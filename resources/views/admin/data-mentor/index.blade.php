@@ -38,7 +38,7 @@
                                 </div>
                                 <input type="text"
                                        x-model="search"
-                                       placeholder="Cari nama atau bidang keahlian..."
+                                       placeholder="Cari nama, bidang, atau email..."
                                        class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 outline-none" />
                             </div>
 
@@ -53,35 +53,73 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto border border-slate-300 rounded-b-2xl bg-white">
                     <table class="min-w-full border-collapse text-left">
                         <thead>
-                            <tr class="bg-slate-50/70 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                <th class="px-6 py-4">Spesialisasi Bidang</th>
+                            <tr class="bg-slate-100 border-b border-slate-300 text-xs font-bold uppercase tracking-wider text-slate-700 divide-x divide-slate-300">
+                                <th class="px-6 py-4 w-12 text-center">No</th>
+                                <th class="px-6 py-4 w-16 text-center">Foto</th>
                                 <th class="px-6 py-4">Nama Lengkap</th>
+                                <th class="px-6 py-4">Bidang Keahlian</th>
+                                <th class="px-6 py-4">No. HP / WA</th>
+                                <th class="px-6 py-4">Alamat Email</th>
+                                <th class="px-6 py-4 text-center w-16">L/P</th>
                                 <th class="px-6 py-4 text-center">Status Akun</th>
-                                <th class="px-6 py-4 text-center pr-6">Aksi</th>
+                                <th class="px-6 py-4 text-center pr-6 w-32">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse($mentors as $mentor)
-                                <tr class="hover:bg-slate-50/50 transition-colors duration-150 text-sm"
+                        <tbody class="divide-y divide-slate-300">
+                            @forelse($mentors as $index => $mentor)
+                                <tr class="hover:bg-slate-50 transition-colors duration-150 text-sm divide-x divide-slate-200"
                                     x-show="'{{ strtolower($mentor->nama) }}'.includes(search.toLowerCase()) ||
-                                            '{{ strtolower($mentor->bidang) }}'.includes(search.toLowerCase())">
+                                            '{{ strtolower($mentor->bidang) }}'.includes(search.toLowerCase()) ||
+                                            '{{ strtolower($mentor->email ?? ($mentor->userAccount->email ?? '')) }}'.includes(search.toLowerCase())">
 
-                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-500 tracking-wide">
-                                        <span class="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-md">
+                                    <td class="px-6 py-4 font-mono text-slate-500 text-center text-xs whitespace-nowrap bg-slate-50/50">
+                                        {{ $mentors->firstItem() + $index }}
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        @if($mentor->foto)
+                                            <img src="{{ asset('storage/' . $mentor->foto) }}" alt="Foto {{ $mentor->nama }}" class="h-9 w-9 rounded-xl object-cover shadow-sm border border-slate-200 mx-auto shrink-0">
+                                        @else
+                                            <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-50 to-slate-100 border border-indigo-100/40 flex items-center justify-center text-indigo-600 font-extrabold text-xs shadow-sm mx-auto shrink-0 uppercase">
+                                                {{ substr($mentor->nama, 0, 2) }}
+                                            </div>
+                                        @endif
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap font-bold text-slate-800">
+                                        {{ $mentor->nama }}
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-slate-600">
+                                        <span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-md">
                                             {{ $mentor->bidang }}
                                         </span>
                                     </td>
 
-                                    <td class="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
-                                        {{ $mentor->nama }}
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-600 font-mono text-xs">
+                                        {{ $mentor->no_hp ?? '-' }}
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-600 font-medium">
+                                        {{ $mentor->email ?? ($mentor->userAccount->email ?? '-') }}
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-center font-bold text-slate-600 text-xs">
+                                        @if($mentor->jk === 'Laki-laki')
+                                            <span>L</span>
+                                        @elseif($mentor->jk === 'Perempuan')
+                                            <span>P</span>
+                                        @else
+                                            <span class="text-slate-300">-</span>
+                                        @endif
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         @if ($mentor->status_akun === 'Aktif')
-                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide bg-emerald-50 text-emerald-700 border border-emerald-200/50">
+                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide bg-indigo-50 text-indigo-700 border border-indigo-200/50">
                                                 Akun Aktif
                                             </span>
                                         @else
@@ -97,7 +135,7 @@
                                             @if ($mentor->status_akun === 'Belum Dibuat')
                                                 <a href="{{ route('admin.users.create') }}?role=mentor&data_mentor_id={{ $mentor->id }}"
                                                    title="Buat Akun Akses Portal"
-                                                   class="inline-flex p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-all duration-200">
+                                                   class="inline-flex p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-all duration-200 border border-indigo-100">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                                     </svg>
@@ -106,7 +144,7 @@
 
                                             <a href="{{ route('admin.data-mentor.edit', $mentor->id) }}"
                                                title="Ubah Data Mentor"
-                                               class="inline-flex p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200">
+                                               class="inline-flex p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 border border-amber-200">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>
@@ -118,7 +156,7 @@
                                                 @csrf @method('DELETE')
                                                 <button type="submit"
                                                         title="Hapus Permanen"
-                                                        class="inline-flex p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition-all duration-200 cursor-pointer">
+                                                        class="inline-flex p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition-all duration-200 cursor-pointer border border-rose-200">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
@@ -130,7 +168,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-10 text-center text-sm text-slate-400 italic bg-slate-50/20">
+                                    <td colspan="9" class="px-6 py-12 text-center text-sm text-slate-400 italic bg-slate-50/50 font-medium">
                                         Belum ada arsip data mentor yang terdaftar di dalam sistem.
                                     </td>
                                 </tr>
@@ -139,6 +177,12 @@
                     </table>
                 </div>
             </div>
+
+            @if($mentors->hasPages())
+                <div class="mt-4">
+                    {{ $mentors->links() }}
+                </div>
+            @endif
 
         </div>
     </div>
