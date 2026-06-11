@@ -399,7 +399,26 @@ class AttendanceController extends Controller
 
         return back()->with('success', "Total " . count($request->ids) . " pengajuan berhasil $pesan.");
     }
+    // -------------------------------------------------------
+    // Mobile API: Melihat riwayat pengajuan milik sendiri
+    // GET /api/absen/riwayat-pengajuan
+    // -------------------------------------------------------
+    public function riwayatPengajuan()
+    {
+        $user = Auth::user();
 
+        // Mengambil data yang statusnya Izin atau Sakit saja
+        $riwayat = Absensi::where('user_id', $user->id)
+            ->whereIn('status_kehadiran', ['Izin', 'Sakit'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar riwayat pengajuan berhasil diambil.',
+            'data'    => $riwayat
+        ]);
+    }
     // Update fungsi summary agar hanya menghitung yang Approved
     public function summary()
     {

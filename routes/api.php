@@ -65,6 +65,7 @@ Route::middleware(['auth:sanctum', 'role:magang'])->group(function () {
      Route::get('/absen/today', [AttendanceController::class, 'today']);
     Route::get('/absen/summary', [AttendanceController::class, 'summary']);
     Route::post('/absen/pengajuan', [AttendanceController::class, 'submitPengajuan']);
+     Route::get('/absen/riwayat-pengajuan', [AttendanceController::class, 'riwayatPengajuan']);
     // Logbook submission
     Route::post('/logbook', [LogbookController::class, 'submitLogbook']);
 
