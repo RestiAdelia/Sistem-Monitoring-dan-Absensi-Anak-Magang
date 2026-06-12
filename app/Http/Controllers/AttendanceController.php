@@ -422,23 +422,35 @@ class AttendanceController extends Controller
     // Update fungsi summary agar hanya menghitung yang Approved
     public function summary()
     {
-       
+
         $user  = Auth::user();
-        $month = Carbon::now()->month;
-        $year  = Carbon::now()->year;
+    $month = Carbon::now()->month;
+    $year  = Carbon::now()->year;
 
-        $records = Absensi::where('user_id', $user->id)
-            ->whereMonth('tanggal', $month)
-            ->whereYear('tanggal', $year)
-            ->where('status_approval', 'approved') // Hanya yang disetujui
-            ->get();
+    // 1. Ambil semua data absensi user di bulan berjalan (Tanpa filter approved di awal)
+    $records = Absensi::where('user_id', $user->id)
+        ->whereMonth('tanggal', $month)
+        ->whereYear('tanggal', $year)
+        ->get();
 
-        return response()->json([
-            'success'   => true,
-            'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
-            'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
-            'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
-            'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
-        ]);
+    // 2. Hitung 'Hadir' dan 'Terlambat' secara langsung (Otomatis masuk tanpa nunggu approve)
+    $hadir = $records->where('status_kehadiran', 'Hadir')->count();
+    $terlambat = $records->where('status_kedatangan', 'Terlambat')->count();
+
+    // 3. Hitung 'Izin' dan 'Sakit' HANYA jika sudah disetujui (approved) oleh Admin
+    $izin = $records->where('status_kehadiran', 'Izin')
+                    ->where('status_approval', 'approved')->count();
+
+    $sakit = $records->where('status_kehadiran', 'Sakit')
+                     ->where('status_approval', 'approved')->count();
+
+    // 4. Kembalikan response JSON ke Flutter
+    return response()->json([
+        'success'   => true,
+        'hadir'     => $hadir,
+        'izin'      => $izin,
+        'sakit'     => $sakit,
+        'terlambat' => $terlambat,
+    ]);
     }
 }
