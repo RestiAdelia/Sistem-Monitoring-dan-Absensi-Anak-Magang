@@ -344,10 +344,10 @@ class AttendanceController extends Controller
             'user_id'           => $user->id,
             'tanggal'           => $today,
             'status_kehadiran'  => $request->status_kehadiran,
-            'status_approval'   => 'pending', 
-            'keterangan_pulang' => $request->keterangan, 
+            'status_approval'   => 'pending',
+            'keterangan_pulang' => $request->keterangan,
             'lampiran'          => $lampiranPath,
-            'status_kedatangan' => $request->status_kehadiran, 
+            'status_kedatangan' => $request->status_kehadiran,
         ]);
 
         return response()->json([
@@ -365,12 +365,14 @@ class AttendanceController extends Controller
     {
         if (Auth::user()->role !== 'admin') abort(403);
 
-        $pendingList = Absensi::with('user')
+        // PERBAIKAN: Menambahkan relasi dataMagang dan mengganti get() menjadi paginate(10)
+        $pendingAbsensis = Absensi::with(['user.dataMagang'])
             ->where('status_approval', 'pending')
+            ->whereIn('status_kehadiran', ['Izin', 'Sakit'])
             ->orderBy('tanggal', 'desc')
-            ->get();
+            ->paginate(10);
 
-        return view('admin.absensi.persetujuan', compact('pendingList'));
+        return view('admin.absensi.persetujuan', compact('pendingAbsensis'));
     }
 
     // -------------------------------------------------------
@@ -380,17 +382,19 @@ class AttendanceController extends Controller
     public function approveReject(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:approved,rejected',
-            'catatan' => 'nullable|string'
+            // PERBAIKAN: Menyelaraskan nama input form dari file Blade persetujuan
+            'status_approval' => 'required|in:approved,rejected',
+            'keterangan_admin' => 'nullable|string|max:255'
         ]);
 
         $absensi = Absensi::findOrFail($id);
         $absensi->update([
-            'status_approval'  => $request->status,
-            'keterangan_admin' => $request->catatan
+            'status_approval'  => $request->status_approval,
+            'keterangan_admin' => $request->keterangan_admin
         ]);
 
-        return back()->with('success', 'Status pengajuan berhasil diperbarui.');
+        $pesan = $request->status_approval === 'approved' ? 'Pengajuan izin/sakit berhasil disetujui.' : 'Pengajuan izin/sakit berhasil ditolak.';
+        return back()->with('success', $pesan);
     }
 
     // Update fungsi summary agar hanya menghitung yang Approved
