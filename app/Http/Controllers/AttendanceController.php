@@ -422,6 +422,7 @@ class AttendanceController extends Controller
     // Update fungsi summary agar hanya menghitung yang Approved
     public function summary()
     {
+       
         $user  = Auth::user();
         $month = Carbon::now()->month;
         $year  = Carbon::now()->year;
