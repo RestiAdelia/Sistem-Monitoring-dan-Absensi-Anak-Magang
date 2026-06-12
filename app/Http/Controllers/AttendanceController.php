@@ -325,19 +325,20 @@ class AttendanceController extends Controller
 
         $absensi = Absensi::create([
             'user_id'           => $user->id,
-            'tanggal'           => $today,
+            'tanggal'           => $start->toDateString(),
             'status_kehadiran'  => $request->status_kehadiran,
             'status_approval'   => 'pending',
             'keterangan_pulang' => $request->keterangan,
             'lampiran'          => $lampiranPath,
             'status_kedatangan' => $request->status_kehadiran,
+            'total_hari'        => $totalDays = $start->diffInDays($end) + 1,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Pengajuan ' . $request->status_kehadiran . ' untuk ' . count($insertedData) . ' hari berhasil dikirim.',
-            'data'    => $insertedData
-        ]);
+       return response()->json([
+        'success' => true,
+        'message' => 'Pengajuan ' . $request->status_kehadiran . ' untuk ' . $totalDays . ' hari berhasil dikirim.',
+        'data'    => $absensi // ✨ Changed from $insertedData to $absensi
+    ]);
     }
 
     // -------------------------------------------------------
@@ -366,7 +367,7 @@ class AttendanceController extends Controller
     // Web Admin: Aksi Approve/Reject (Mendukung Massal)
     // POST /admin/absensi/approve-batch
     // -------------------------------------------------------
-    public function approveReject(Request $request)
+    public function approveReject(Request $request , $id)
     {
         $request->validate([
             // PERBAIKAN: Menyelaraskan nama input form dari file Blade persetujuan
@@ -381,11 +382,10 @@ class AttendanceController extends Controller
         ]);
 
         $pesan = $request->status_approval === 'approved' ? 'Pengajuan izin/sakit berhasil disetujui.' : 'Pengajuan izin/sakit berhasil ditolak.';
-        return back()->with('success', $pesan);
-    }
+        return back()->with('success', $pesan . " Data berhasil diperbarui.");
+    
+     }  
 
-        return back()->with('success', "Total " . count($request->ids) . " pengajuan berhasil $pesan.");
-    }
     // -------------------------------------------------------
     // Mobile API: Melihat riwayat pengajuan milik sendiri
     // GET /api/absen/riwayat-pengajuan
