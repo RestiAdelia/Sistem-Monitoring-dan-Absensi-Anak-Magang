@@ -4,9 +4,10 @@
     <div class="hidden lg:flex lg:flex-col lg:h-full">
         <div class="px-6 py-6 border-b border-slate-800 bg-black/10">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3.5 group">
-                <div
-                    class="p-2.5 bg-gradient-to-tr from-blue-500 via-indigo-500 to-violet-500 rounded-xl shadow-xl shadow-indigo-500/20 group-hover:rotate-6 transition-transform duration-300">
-                    <x-application-logo class="h-5 w-5 text-white" />
+                <div class="p-1.5 bg-white rounded-lg">
+                     <img src="{{ asset('build/assets/img/logo_mediatama.jpeg') }}"
+         alt="Logo Mediatama"
+         class="w-6 h-6 object-contain">
                 </div>
                 <div class="overflow-hidden">
                     <p

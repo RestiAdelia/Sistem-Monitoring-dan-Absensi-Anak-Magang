@@ -41,30 +41,6 @@ class AttendanceController extends Controller
     }
 
     // -------------------------------------------------------
-    // Mobile API: Ringkasan absensi bulan ini
-    // GET /api/absen/summary
-    // -------------------------------------------------------
-    // public function summary()
-    // {
-    //     $user  = Auth::user();
-    //     $month = Carbon::now()->month;
-    //     $year  = Carbon::now()->year;
-
-    //     $records = Absensi::where('user_id', $user->id)
-    //         ->whereMonth('tanggal', $month)
-    //         ->whereYear('tanggal', $year)
-    //         ->get();
-
-    //     return response()->json([
-    //         'success'   => true,
-    //         'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
-    //         // 'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
-    //         // 'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
-    //         'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
-    //     ]);
-   // }
-
-    // -------------------------------------------------------
     // Mobile API: Submit absensi (masuk / pulang)
     // POST /api/absen
     // -------------------------------------------------------
@@ -321,20 +297,27 @@ class AttendanceController extends Controller
         $request->validate([
             'status_kehadiran' => 'required|in:Izin,Sakit',
             'keterangan'       => 'required|string|min:10',
-            'lampiran'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB
+            'tanggal_mulai'    => 'required|date|after_or_equal:today',
+            'tanggal_selesai'  => 'required|date|after_or_equal:tanggal_mulai',
+            'lampiran'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $today = Carbon::today()->toDateString();
+        $start = Carbon::parse($request->tanggal_mulai);
+        $end   = Carbon::parse($request->tanggal_selesai);
 
-        // Cek apakah sudah ada absen/pengajuan hari ini
-        $existing = Absensi::where('user_id', $user->id)->where('tanggal', $today)->first();
+        // 1. Cek apakah di rentang tanggal tersebut user sudah punya data absen
+        $existing = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])
+            ->first();
+
         if ($existing) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda sudah melakukan presensi atau pengajuan hari ini.'
+                'message' => 'Gagal! Anda sudah memiliki data absensi/pengajuan pada rentang tanggal tersebut (' . $existing->tanggal . ').'
             ], 422);
         }
 
+        // 2. Upload Lampiran (satu file untuk semua hari dalam rentang tsb)
         $lampiranPath = null;
         if ($request->hasFile('lampiran')) {
             $lampiranPath = $request->file('lampiran')->store('lampiran_absen', 'public');
@@ -352,8 +335,8 @@ class AttendanceController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Pengajuan ' . $request->status_kehadiran . ' berhasil dikirim, menunggu persetujuan admin.',
-            'data'    => $absensi
+            'message' => 'Pengajuan ' . $request->status_kehadiran . ' untuk ' . count($insertedData) . ' hari berhasil dikirim.',
+            'data'    => $insertedData
         ]);
     }
 
@@ -379,7 +362,11 @@ class AttendanceController extends Controller
     // Web Admin: Aksi Approve/Reject
     // POST /admin/absensi/approve/{id}
     // -------------------------------------------------------
-    public function approveReject(Request $request, $id)
+    // -------------------------------------------------------
+    // Web Admin: Aksi Approve/Reject (Mendukung Massal)
+    // POST /admin/absensi/approve-batch
+    // -------------------------------------------------------
+    public function approveReject(Request $request)
     {
         $request->validate([
             // PERBAIKAN: Menyelaraskan nama input form dari file Blade persetujuan
@@ -397,25 +384,60 @@ class AttendanceController extends Controller
         return back()->with('success', $pesan);
     }
 
-    // Update fungsi summary agar hanya menghitung yang Approved
-    public function summary()
+        return back()->with('success', "Total " . count($request->ids) . " pengajuan berhasil $pesan.");
+    }
+    // -------------------------------------------------------
+    // Mobile API: Melihat riwayat pengajuan milik sendiri
+    // GET /api/absen/riwayat-pengajuan
+    // -------------------------------------------------------
+    public function riwayatPengajuan()
     {
-        $user  = Auth::user();
-        $month = Carbon::now()->month;
-        $year  = Carbon::now()->year;
+        $user = Auth::user();
 
-        $records = Absensi::where('user_id', $user->id)
-            ->whereMonth('tanggal', $month)
-            ->whereYear('tanggal', $year)
-            ->where('status_approval', 'approved') // Hanya yang disetujui
+        // Mengambil data yang statusnya Izin atau Sakit saja
+        $riwayat = Absensi::where('user_id', $user->id)
+            ->whereIn('status_kehadiran', ['Izin', 'Sakit'])
+            ->orderBy('tanggal', 'desc')
             ->get();
 
         return response()->json([
-            'success'   => true,
-            'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
-            'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
-            'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
-            'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
+            'success' => true,
+            'message' => 'Daftar riwayat pengajuan berhasil diambil.',
+            'data'    => $riwayat
         ]);
+    }
+    // Update fungsi summary agar hanya menghitung yang Approved
+    public function summary()
+    {
+
+        $user  = Auth::user();
+    $month = Carbon::now()->month;
+    $year  = Carbon::now()->year;
+
+    // 1. Ambil semua data absensi user di bulan berjalan (Tanpa filter approved di awal)
+    $records = Absensi::where('user_id', $user->id)
+        ->whereMonth('tanggal', $month)
+        ->whereYear('tanggal', $year)
+        ->get();
+
+    // 2. Hitung 'Hadir' dan 'Terlambat' secara langsung (Otomatis masuk tanpa nunggu approve)
+    $hadir = $records->where('status_kehadiran', 'Hadir')->count();
+    $terlambat = $records->where('status_kedatangan', 'Terlambat')->count();
+
+    // 3. Hitung 'Izin' dan 'Sakit' HANYA jika sudah disetujui (approved) oleh Admin
+    $izin = $records->where('status_kehadiran', 'Izin')
+                    ->where('status_approval', 'approved')->count();
+
+    $sakit = $records->where('status_kehadiran', 'Sakit')
+                     ->where('status_approval', 'approved')->count();
+
+    // 4. Kembalikan response JSON ke Flutter
+    return response()->json([
+        'success'   => true,
+        'hadir'     => $hadir,
+        'izin'      => $izin,
+        'sakit'     => $sakit,
+        'terlambat' => $terlambat,
+    ]);
     }
 }
