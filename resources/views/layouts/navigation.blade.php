@@ -4,8 +4,10 @@
     <div class="hidden lg:flex lg:flex-col lg:h-full">
         <div class="px-6 py-6 border-b border-slate-800 bg-black/10">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3.5 group">
-                <div class="p-2.5 bg-gradient-to-tr from-blue-500 via-indigo-500 to-violet-500 rounded-xl shadow-xl shadow-indigo-500/20 group-hover:rotate-6 transition-transform duration-300">
-                    <x-application-logo class="h-5 w-5 text-white" />
+                <div class="p-1.5 bg-white rounded-lg">
+                     <img src="{{ asset('build/assets/img/logo_mediatama.jpeg') }}"
+         alt="Logo Mediatama"
+         class="w-6 h-6 object-contain">
                 </div>
                 <div class="overflow-hidden">
                     <p class="text-sm font-extrabold tracking-tight text-white group-hover:text-indigo-400 transition-colors">{{ config('app.name', 'Laravel') }}</p>
@@ -36,7 +38,7 @@
                 Absensi
             </a>
 
-            
+
 
             <a href="{{ route('admin.users.index') }}"
                 class="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-medium transition-all duration-300 hover:translate-x-1 {{ request()->routeIs('admin.users.*') ? 'bg-gradient-to-r from-indigo-500/20 via-blue-500/10 to-transparent text-white border-l-2 border-indigo-500 font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
