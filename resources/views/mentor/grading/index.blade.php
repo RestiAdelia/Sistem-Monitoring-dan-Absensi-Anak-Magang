@@ -13,7 +13,6 @@
     <div class="py-10 bg-slate-50/50 min-h-screen" x-data="{ search: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <!-- Toast Notifikasi Sukses -->
             @if(session('success'))
                 <div class="bg-emerald-50 border border-emerald-200/60 p-4 rounded-xl shadow-sm flex items-center justify-between animate-fade-in">
                     <div class="flex items-center gap-2.5">
@@ -27,14 +26,11 @@
                 </div>
             @endif
 
-            <!-- Card Utama Block dengan Garis Aksen Biru Premium -->
             <div class="bg-white shadow-sm rounded-2xl border border-slate-100 border-l-4 border-l-blue-500 overflow-hidden">
 
-                <!-- Header Informasi & Kontrol Pencarian -->
                 <div class="px-6 py-5 border-b border-slate-100 bg-white">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div class="flex items-start space-x-3">
-                            <!-- Latar belakang dan warna ikon diselaraskan ke biru langit / blue-600 -->
                             <div class="p-2 bg-blue-50 text-blue-600 rounded-xl mt-0.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -44,7 +40,6 @@
                                 <h3 class="text-base font-black text-slate-800 tracking-tight">Evaluasi Kelulusan & Nilai Akhir</h3>
                                 <p class="text-xs text-slate-400 mt-0.5">Hitung nilai akhir anak magang berdasarkan akumulasi kehadiran, rata-rata tugas, dan performa.</p>
 
-                                <!-- Formula Badge Status -->
                                 <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-600 rounded-lg">
                                     <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                     Formula: <span class="font-mono font-bold text-indigo-600">(30% Absen) + (40% Tugas) + (30% Performa)</span>
@@ -52,7 +47,6 @@
                             </div>
                         </div>
 
-                        <!-- Kolom Filter Pencarian -->
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
                             <div class="relative flex-1 sm:w-64">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
@@ -60,7 +54,6 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </div>
-                                <!-- Mengubah focus border dan focus ring menjadi warna biru premium -->
                                 <input type="text"
                                        x-model="search"
                                        placeholder="Cari nama atau NIM anak magang..."
@@ -75,7 +68,6 @@
                     </div>
                 </div>
 
-                <!-- List Stack Panel Input Nilai Peserta -->
                 <div class="divide-y divide-slate-100 bg-white">
                     @forelse($interns as $intern)
                         <div class="p-5 sm:p-6 hover:bg-slate-50/40 transition-colors duration-150"
@@ -84,9 +76,13 @@
 
                             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
 
-                                <!-- SISI KIRI: Profil & Informasi Akumulasi Berkas Sistem -->
                                 <div class="space-y-3 min-w-0 flex-1">
                                     <div class="flex items-center gap-3.5">
+
+                                        <div class="text-xs font-mono font-bold text-slate-400 w-6 h-6 rounded-lg bg-slate-50 border border-slate-200/70 flex items-center justify-center shrink-0 shadow-sm">
+                                            {{ $loop->iteration }}
+                                        </div>
+
                                         <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-50 to-indigo-50 border border-blue-100/40 flex items-center justify-center text-blue-600 font-extrabold text-sm shadow-sm shrink-0">
                                             {{ substr($intern->name, 0, 1) }}
                                         </div>
@@ -98,8 +94,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Log Kalkulasi Otomatis Sistem -->
-                                    <div class="flex flex-wrap gap-2 pt-0.5">
+                                    <div class="flex flex-wrap gap-2 pt-0.5 ml-10">
                                         <div class="bg-slate-50/60 px-3 py-1 rounded-xl border border-slate-200/50 shadow-inner flex items-center gap-2 text-[11px]">
                                             <span class="font-semibold text-slate-400">Kehadiran Sistem:</span>
                                             <span class="font-bold font-mono text-indigo-600 bg-white border border-slate-200 px-1.5 py-0.5 rounded shadow-sm">{{ $intern->calculated_attendance }}%</span>
@@ -111,10 +106,8 @@
                                     </div>
                                 </div>
 
-                                <!-- SISI KANAN: Form Pengisian & Output Total Skor Akhir -->
                                 <div class="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:justify-end flex-shrink-0">
 
-                                    <!-- Input Form Lapisan Pertama (Semua focus:border diubah ke warna biru) -->
                                     <form action="{{ route('mentor.grading.submit', $intern->id) }}" method="POST" class="bg-white p-2 border border-slate-200 shadow-sm rounded-xl flex items-center gap-3 justify-between h-[58px] sm:w-auto w-full">
                                         @csrf
                                         <div class="flex items-center gap-2 pl-1">
@@ -137,7 +130,6 @@
                                         </button>
                                     </form>
 
-                                    <!-- Panel Output Skor Akhir / Status -->
                                     <div class="flex-shrink-0">
                                         @if($intern->nilaiAkhirDanSertifikat)
                                             <div class="bg-[#0B1329] text-white p-3 border border-slate-800 shadow-sm rounded-xl flex items-center gap-4 text-center justify-center h-[58px] min-w-[210px]">
@@ -170,7 +162,6 @@
                             </div>
                         </div>
                     @empty
-                        <!-- Empty State Sesuai Standar Halaman Induk -->
                         <div class="py-20 text-center bg-white">
                             <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
                                 <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-slate-400 mb-3.5 shadow-inner">
