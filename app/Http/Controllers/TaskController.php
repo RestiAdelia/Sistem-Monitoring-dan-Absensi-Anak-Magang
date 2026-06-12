@@ -21,7 +21,13 @@ class TaskController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $tasks = Tugas::where('mentor_id', $mentor->id)->withCount('pengumpulanTugas')->get();
+        // $tasks = Tugas::where('mentor_id', $mentor->id)
+        //     ->withCount('pengumpulanTugas')->get();
+
+        $tasks = Tugas::where('mentor_id', $mentor->id)
+            ->withCount('pengumpulanTugas')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Get submissions from interns assigned to this mentor
         $internIds = $mentor->interns()->pluck('id');
@@ -196,7 +202,7 @@ class TaskController extends Controller
 
         // 5. Kirim data ke view mentor.tasks.show
         return view('mentor.tasks.show', compact('task', 'submissions'));
-    }   
+    }
     /**
      * Web View: Grade an intern's submission.
      */

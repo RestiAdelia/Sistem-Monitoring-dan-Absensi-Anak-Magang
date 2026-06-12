@@ -17,11 +17,17 @@
                     </svg>
                     <span class="text-xs font-bold uppercase tracking-wider">Filter Laporan</span>
                 </div>
-                <form method="GET" class="flex gap-2 items-center">
-                    <input type="date" name="tanggal" value="{{ request('tanggal') }}" 
+                <form method="GET" class="flex flex-wrap gap-2 items-center">
+                    <span class="text-xs text-slate-500 font-medium">Dari:</span>
+                    <input type="date" name="start_date" value="{{ request('start_date') }}" required
                            class="text-xs border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+
+                    <span class="text-xs text-slate-500 font-medium">Sampai:</span>
+                    <input type="date" name="end_date" value="{{ request('end_date') }}" required
+                           class="text-xs border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+
                     <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-900 transition">Cari</button>
-                    <a href="{{ route('mentor.logbooks.show', $intern->id) }}" class="text-xs text-slate-500 hover:text-slate-800 underline px-2">Reset</a>
+                    <a href="{{ route('mentor.logbooks.show', $intern->id) }}" class="text-xs text-slate-500 hover:text-slate-800 underline px-2">Reset (6 Hari)</a>
                 </form>
             </div>
 
