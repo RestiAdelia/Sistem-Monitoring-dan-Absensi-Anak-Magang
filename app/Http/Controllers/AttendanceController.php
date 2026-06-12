@@ -393,7 +393,7 @@ class AttendanceController extends Controller
             ->paginate(10); // 
 
         
-        return view('admin.absensi.index', compact('allPengajuan'));
+        return view('admin.absensi.riwayat', compact('allPengajuan'));
     }
     // -------------------------------------------------------
     // Mobile API: Melihat riwayat pengajuan milik sendiri
