@@ -13,10 +13,8 @@
     <div class="py-10 bg-slate-50/50 min-h-screen" x-data="{ search: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <!-- Card Utama Block dengan Garis Aksen Biru Premium -->
             <div class="bg-white shadow-sm rounded-2xl border border-slate-100 border-l-4 border-l-blue-500 overflow-hidden">
 
-                <!-- Header Kontrol & Kolom Pencarian Dinamis -->
                 <div class="px-6 py-5 border-b border-slate-100 bg-white">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div class="flex items-center space-x-3">
@@ -32,7 +30,6 @@
                             </div>
                         </div>
 
-                        <!-- Input Filter Alpine.js Berwarna Blue Premium -->
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
                             <div class="relative flex-1 sm:w-64">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
@@ -54,12 +51,10 @@
                     </div>
                 </div>
 
-                <!-- Bagian Konten Tabel -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full border-collapse text-left">
                         <thead>
                             <tr class="bg-slate-50/70 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                <!-- TAMBAHAN: Kolom Header No -->
                                 <th class="px-6 py-4 text-center w-12">No.</th>
                                 <th class="px-6 py-4">Tanggal</th>
                                 <th class="px-6 py-4">Anak Magang</th>
@@ -76,17 +71,14 @@
                                             '{{ strtolower($absen->user->nomor_induk) }}'.includes(search.toLowerCase()) ||
                                             '{{ strtolower($absen->tanggal->format('d M Y')) }}'.includes(search.toLowerCase())">
 
-                                    <!-- TAMBAHAN: Data No Otomatis -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-slate-400 font-medium font-mono text-xs">
                                         {{ $loop->iteration }}
                                     </td>
 
-                                    <!-- Tanggal -->
                                     <td class="px-6 py-4 whitespace-nowrap text-slate-600 font-semibold font-mono text-xs">
                                         {{ $absen->tanggal->format('d M Y') }}
                                     </td>
 
-                                    <!-- Info Anak Magang -->
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
                                             <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-50 to-indigo-50 border border-blue-100/40 flex items-center justify-center text-blue-600 font-extrabold text-sm shadow-sm shrink-0">
@@ -99,32 +91,28 @@
                                         </div>
                                     </td>
 
-                                    <!-- Jam Masuk -->
                                     <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-600 font-mono">
                                         {{ $absen->jam_masuk ? $absen->jam_masuk->format('H:i:s') : '-' }}
                                     </td>
 
-                                    <!-- Jam Pulang -->
                                     <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-600 font-mono">
                                         {{ $absen->jam_pulang ? $absen->jam_pulang->format('H:i:s') : '-' }}
                                     </td>
 
-                                    <!-- Google Maps Koordinat Link -->
                                     <td class="px-6 py-4 whitespace-nowrap text-xs">
                                         @if($absen->latitude_masuk && $absen->longitude_masuk)
-                                            <a href="http://maps.google.com/?q={{ $absen->latitude_masuk }},{{ $absen->longitude_masuk }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50/50 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg inline-flex items-center gap-1.5 font-bold transition-colors border border-indigo-100/20">
+                                            <a href="https://maps.google.com/?q={{ $absen->latitude_masuk }},{{ $absen->longitude_masuk }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50/50 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg inline-flex items-center gap-1.5 font-bold transition-colors border border-indigo-100/20">
                                                 <svg class="h-3.5 w-3.5 flex-shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
                                                 <span class="font-mono text-[11px]">{{ round($absen->latitude_masuk, 4) }}, {{ round($absen->longitude_masuk, 4) }}</span>
                                             </a>
-                                        @_else
+                                        @else
                                             <span class="text-slate-300 font-mono pl-1">-</span>
                                         @endif
                                     </td>
 
-                                    <!-- Status Kehadiran Terkalibrasi -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center pr-8">
                                         @if($absen->status_kehadiran === 'Hadir')
                                             <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide bg-blue-50 text-blue-700 border border-blue-200/50">
@@ -146,7 +134,6 @@
                                     </td>
                                 </tr>
                             @empty
-                                <!-- Empty State (colspan diubah dari 6 menjadi 7 karena ada kolom No) -->
                                 <tr>
                                     <td colspan="7" class="px-6 py-16 text-center bg-white">
                                         <div class="flex flex-col items-center justify-center max-w-sm mx-auto">

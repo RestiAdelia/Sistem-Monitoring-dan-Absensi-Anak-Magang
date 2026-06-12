@@ -56,11 +56,13 @@
                                         <p class="text-[10px] text-slate-400 font-medium">{{ $intern->email }}</p>
                                     </div>
                                 </td>
+
                                 <td class="px-6 py-4 text-center">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
                                         {{ $intern->logbooks_count }} Laporan
                                     </span>
                                 </td>
+
                                 <td class="px-6 py-4 text-right">
                                     <a href="{{ route('mentor.logbooks.show', $intern->id) }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-blue-600 text-white text-[11px] font-bold rounded-lg transition-all shadow-sm">
                                         Detail Laporan
@@ -69,13 +71,19 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-xs text-slate-400">Tidak ada anak magang yang sedang aktif ditemukan.</td>
+                                <td colspan="5" class="px-6 py-12 text-center text-xs text-slate-400">
+                                    Tidak ada anak magang yang sedang aktif ditemukan.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-            <div class="mt-4">{{ $interns->links() }}</div>
+
+            <div class="mt-4">
+                {{ $interns->links() }}
+            </div>
+
         </div>
     </div>
 </x-app-layout>

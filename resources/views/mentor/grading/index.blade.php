@@ -79,7 +79,7 @@
                                 <div class="space-y-3 min-w-0 flex-1">
                                     <div class="flex items-center gap-3.5">
 
-                                        <div class="text-xs font-mono font-bold text-slate-400 w-5 text-center shrink-0">
+                                        <div class="text-xs font-mono font-bold text-slate-400 w-6 h-6 rounded-lg bg-slate-50 border border-slate-200/70 flex items-center justify-center shrink-0 shadow-sm">
                                             {{ $loop->iteration }}
                                         </div>
 
@@ -94,7 +94,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="flex flex-wrap gap-2 pt-0.5 ml-8"> <div class="bg-slate-50/60 px-3 py-1 rounded-xl border border-slate-200/50 shadow-inner flex items-center gap-2 text-[11px]">
+                                    <div class="flex flex-wrap gap-2 pt-0.5 ml-10">
+                                        <div class="bg-slate-50/60 px-3 py-1 rounded-xl border border-slate-200/50 shadow-inner flex items-center gap-2 text-[11px]">
                                             <span class="font-semibold text-slate-400">Kehadiran Sistem:</span>
                                             <span class="font-bold font-mono text-indigo-600 bg-white border border-slate-200 px-1.5 py-0.5 rounded shadow-sm">{{ $intern->calculated_attendance }}%</span>
                                         </div>
