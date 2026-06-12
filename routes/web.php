@@ -65,6 +65,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('data-mentor/{data_mentor}', [MentorDataController::class, 'destroy'])->name('data-mentor.destroy');
     Route::get('/admin/absensi/persetujuan', [AttendanceController::class, 'pendingApprovals'])->name('absensi.pending');
     Route::post('/admin/absensi/approve/{id}', [AttendanceController::class, 'approveReject'])->name('absensi.action');
+    Route::get('/daftar-pengajuan', [AttendanceController::class, 'daftarPengajuanAdmin'])->name('absensi.pengajuan');
 });
 
 // Mentor dashboards (Attendance view, Logbook approval, Tasks distribution/grading, Graduation check)

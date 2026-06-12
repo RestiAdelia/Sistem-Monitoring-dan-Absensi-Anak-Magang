@@ -27,12 +27,24 @@
                 </div>
 
                 <div class="divide-y divide-slate-100">
-                    @forelse($submissions as $sub)
+                    @forelse($submissions as $index => $sub)
                         <div class="p-6 hover:bg-slate-50/30 transition-all flex flex-col lg:flex-row gap-6 items-start">
+                            
+                            {{-- ✨ Tambahan Komponen Nomor Urut Looping --}}
+                            <div class="flex-shrink-0 pt-0.5">
+                                <div class="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center font-bold font-mono text-xs shadow-xs">
+                                    @if(method_exists($submissions, 'currentPage'))
+                                        {{ $loop->iteration + ($submissions->currentPage() - 1) * $submissions->perPage() }}
+                                    @else
+                                        {{ $loop->iteration }}
+                                    @endif
+                                </div>
+                            </div>
+
                             <div class="flex-1 space-y-2">
                                 <div class="flex items-center gap-3">
-                                    <div class="h-8 w-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-sm">
-                                        {{ substr($sub->user->name, 0, 1) }}
+                                    <div class="h-8 w-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-sm uppercase">
+                                        {{ substr($sub->user->name, 0, 2) }}
                                     </div>
                                     <div>
                                         <h4 class="text-sm font-bold text-slate-900">{{ $sub->user->name }}</h4>
