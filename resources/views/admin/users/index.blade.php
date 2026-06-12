@@ -26,7 +26,7 @@
                                 <h3 class="text-base font-black text-slate-800 tracking-tight">Daftar Akun Mentor</h3>
                                 <span class="px-2 py-0.5 bg-indigo-100 text-indigo-800 text-[10px] font-bold uppercase rounded-md tracking-wider">Pembimbing</span>
                             </div>
-                            <p class="text-xs text-slate-400 mt-0.5">Total: <span class="font-semibold text-indigo-600">{{ $mentorAccounts->count() }}</span> Akun Pembimbing Lapangan</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Menampilkan halaman akun pembimbing lapangan resmi.</p>
                         </div>
                     </div>
 
@@ -49,40 +49,46 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto border border-slate-300 bg-white">
                     <table class="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr class="text-xs font-semibold text-slate-500 uppercase bg-slate-50/70 border-b border-slate-100">
-                                <th class="px-6 py-4 tracking-wider">Nama / NIP</th>
-                                <th class="px-6 py-4 tracking-wider">Email</th>
-                                <th class="px-6 py-4 tracking-wider text-center">Status</th>
-                                <th class="px-6 py-4 tracking-wider text-center pr-6">Aksi</th>
+                            <tr class="text-xs font-bold text-slate-700 uppercase bg-slate-100 border-b border-slate-300 divide-x divide-slate-300">
+                                <th class="px-6 py-4 w-12 text-center">No</th>
+                                <th class="px-6 py-4">Nama / NIP</th>
+                                <th class="px-6 py-4">Email Login</th>
+                                <th class="px-6 py-4 text-center w-28">Status</th>
+                                <th class="px-6 py-4 text-center pr-6 w-32">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse($mentorAccounts as $account)
-                            <tr class="hover:bg-slate-50/50 transition-colors duration-150"
+                        <tbody class="divide-y divide-slate-300">
+                            @forelse($mentorAccounts as $index => $account)
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 text-sm divide-x divide-slate-200"
                                 x-show="'{{ strtolower($account->name) }}'.includes(searchMentor.toLowerCase()) || '{{ strtolower($account->nomor_induk) }}'.includes(searchMentor.toLowerCase())">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="font-semibold text-slate-800">{{ $account->name }}</div>
-                                    <div class="text-xs text-slate-400 mt-0.5 tracking-medium">NIP. {{ $account->nomor_induk }}</div>
+
+                                <td class="px-6 py-4 font-mono text-slate-500 text-center text-xs whitespace-nowrap bg-slate-50/50">
+                                    {{ method_exists($mentorAccounts, 'firstItem') ? ($mentorAccounts->firstItem() + $index) : ($index + 1) }}
                                 </td>
-                                <td class="px-6 py-4 text-slate-600 whitespace-nowrap">{{ $account->email }}</td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-bold text-slate-800">{{ $account->name }}</div>
+                                    <div class="text-xs text-slate-400 font-mono mt-0.5">NIP. {{ $account->nomor_induk }}</div>
+                                </td>
+                                <td class="px-6 py-4 text-slate-600 font-medium whitespace-nowrap">{{ $account->email }}</td>
                                 <td class="px-6 py-4 text-center whitespace-nowrap">
-                                    <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide {{ $account->is_active ? 'bg-blue-50 text-indigo-700 border border-indigo-100/50' : 'bg-slate-100 text-slate-500 border border-slate-200/50' }}">
+                                    <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide {{ $account->is_active ? 'bg-blue-50 text-indigo-700 border border-indigo-200/50' : 'bg-slate-100 text-slate-500 border border-slate-200/50' }}">
                                         {{ $account->is_active ? 'Aktif' : 'Non-Aktif' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center whitespace-nowrap pr-6">
                                     <div class="inline-flex items-center justify-center space-x-2.5">
-                                        <a href="{{ route('admin.users.edit', $account->id) }}" title="Ubah Akun" class="inline-flex p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-all duration-200">
+                                        <a href="{{ route('admin.users.edit', $account->id) }}" title="Ubah Akun" class="inline-flex p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-all duration-200 border border-indigo-100">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </a>
                                         <form action="{{ route('admin.users.toggle-status', $account->id) }}" method="POST" class="inline-block">
                                             @csrf @method('PATCH')
-                                            <button type="submit" title="{{ $account->is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}" class="inline-flex p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 cursor-pointer">
+                                            <button type="submit" title="{{ $account->is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}" class="inline-flex p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 cursor-pointer border border-amber-200">
                                                 @if($account->is_active)
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -99,13 +105,19 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-10 text-center text-sm text-slate-400 italic bg-slate-50/20">Belum ada data akun mentor.</td>
+                                <td colspan="5" class="px-6 py-12 text-center text-sm text-slate-400 italic bg-slate-50/50 font-medium">Belum ada data akun mentor.</td>
                             </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            @if(method_exists($mentorAccounts, 'hasPages') && $mentorAccounts->hasPages())
+                <div class="mt-2 p-4 bg-white border border-slate-300 rounded-2xl shadow-sm">
+                    {{ $mentorAccounts->appends(request()->except('mentors_page'))->links() }}
+                </div>
+            @endif
 
             <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-slate-100 border-l-4 border-l-sky-500">
                 <div class="p-6 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white">
@@ -121,7 +133,7 @@
                                 <h3 class="text-base font-black text-slate-800 tracking-tight">Daftar Akun Anak Magang</h3>
                                 <span class="px-2 py-0.5 bg-sky-100 text-sky-800 text-[10px] font-bold uppercase rounded-md tracking-wider">Siswa/Mahasiswa</span>
                             </div>
-                            <p class="text-xs text-slate-400 mt-0.5">Total: <span class="font-semibold text-sky-600">{{ $magangAccounts->count() }}</span> Akun Peserta Magang</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Menampilkan halaman akun aktivitas operasional peserta magang.</p>
                         </div>
                     </div>
 
@@ -136,7 +148,7 @@
                         </div>
 
                         <a href="{{ route('admin.users.create') }}" class="inline-flex items-center justify-center px-4 py-2.5 bg-sky-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-sky-600 transition duration-150 shadow-md shadow-sky-100 whitespace-nowrap">
-                            <svg xmlns="http://www.w3.org/2000/xl" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                             Tambah Anak Magang
@@ -144,33 +156,39 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto border border-slate-300 bg-white">
                     <table class="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr class="text-xs font-semibold text-slate-500 uppercase bg-slate-50/70 border-b border-slate-100">
-                                <th class="px-6 py-4 tracking-wider">Nama / NIM</th>
-                                <th class="px-6 py-4 tracking-wider">Instansi</th>
-                                <th class="px-6 py-4 tracking-wider">Mentor Pendamping</th>
-                                <th class="px-6 py-4 tracking-wider text-center">Status</th>
-                                <th class="px-6 py-4 tracking-wider text-center pr-6">Aksi</th>
+                            <tr class="text-xs font-bold text-slate-700 uppercase bg-slate-100 border-b border-slate-300 divide-x divide-slate-300">
+                                <th class="px-6 py-4 w-12 text-center">No</th>
+                                <th class="px-6 py-4">Nama / NIM</th>
+                                <th class="px-6 py-4">Instansi</th>
+                                <th class="px-6 py-4">Mentor Pendamping</th>
+                                <th class="px-6 py-4 text-center w-28">Status</th>
+                                <th class="px-6 py-4 text-center pr-6 w-32">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse($magangAccounts as $account)
-                            <tr class="hover:bg-slate-50/50 transition-colors duration-150"
+                        <tbody class="divide-y divide-slate-300">
+                            @forelse($magangAccounts as $index => $account)
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 text-sm divide-x divide-slate-200"
                                 x-show="'{{ strtolower($account->name) }}'.includes(searchMagang.toLowerCase()) || '{{ strtolower($account->nomor_induk) }}'.includes(searchMagang.toLowerCase()) || '{{ strtolower($account->dataMagang->instansi ?? '') }}'.includes(searchMagang.toLowerCase())">
+
+                                <td class="px-6 py-4 font-mono text-slate-500 text-center text-xs whitespace-nowrap bg-slate-50/50">
+                                    {{ method_exists($magangAccounts, 'firstItem') ? ($magangAccounts->firstItem() + $index) : ($index + 1) }}
+                                </td>
+
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="font-semibold text-slate-800">{{ $account->name }}</div>
-                                    <div class="text-xs text-slate-400 mt-0.5 tracking-medium">NIM/NIDN. {{ $account->nomor_induk }}</div>
+                                    <div class="font-bold text-slate-800">{{ $account->name }}</div>
+                                    <div class="text-xs text-slate-400 font-mono mt-0.5">NIM/NISN. {{ $account->nomor_induk }}</div>
                                 </td>
                                 <td class="px-6 py-4 text-slate-600 whitespace-nowrap">
-                                    <span class="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-md">{{ $account->dataMagang->instansi ?? '-' }}</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-md uppercase">{{ $account->dataMagang->instansi ?? '-' }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($account->mentor)
                                     <div class="flex items-center space-x-2">
                                         <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                                        <span class="text-sm font-medium text-slate-700">{{ $account->mentor->name }}</span>
+                                        <span class="text-sm font-bold text-slate-700">{{ $account->mentor->name }}</span>
                                     </div>
                                     @else
                                     <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-600 border border-rose-100">Belum diplot</span>
@@ -183,14 +201,14 @@
                                 </td>
                                 <td class="px-6 py-4 text-center whitespace-nowrap pr-6">
                                     <div class="inline-flex items-center justify-center space-x-2.5">
-                                        <a href="{{ route('admin.users.edit', $account->id) }}" title="Ubah Akun" class="inline-flex p-1.5 bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white rounded-lg transition-all duration-200">
+                                        <a href="{{ route('admin.users.edit', $account->id) }}" title="Ubah Akun" class="inline-flex p-1.5 bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white rounded-lg transition-all duration-200 border border-sky-100">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </a>
                                         <form action="{{ route('admin.users.toggle-status', $account->id) }}" method="POST" class="inline-block">
                                             @csrf @method('PATCH')
-                                            <button type="submit" title="{{ $account->is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}" class="inline-flex p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 cursor-pointer">
+                                            <button type="submit" title="{{ $account->is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}" class="inline-flex p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 cursor-pointer border border-amber-200">
                                                 @if($account->is_active)
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -207,13 +225,19 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-sm text-slate-400 italic bg-slate-50/20">Belum ada data akun anak magang.</td>
+                                <td colspan="6" class="px-6 py-12 text-center text-sm text-slate-400 italic bg-slate-50/50 font-medium">Belum ada data akun anak magang.</td>
                             </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            @if(method_exists($magangAccounts, 'hasPages') && $magangAccounts->hasPages())
+                <div class="mt-2 p-4 bg-white border border-slate-300 rounded-2xl shadow-sm">
+                    {{ $magangAccounts->appends(request()->except('magangs_page'))->links() }}
+                </div>
+            @endif
 
         </div>
     </div>

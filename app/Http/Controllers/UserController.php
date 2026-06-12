@@ -34,6 +34,9 @@ class UserController extends Controller
             ->orderBy('name')
             ->get();
 
+        $mentorAccounts = User::where('role', 'mentor')->orderBy('name')->paginate(5, ['*'], 'mentors_page');
+        $magangAccounts = User::where('role', 'magang')->orderBy('name')->paginate(5, ['*'], 'magangs_page');
+
         return view('admin.users.index', compact('mentorAccounts', 'magangAccounts'));
     }
 

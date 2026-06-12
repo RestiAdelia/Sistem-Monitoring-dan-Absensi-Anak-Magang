@@ -49,10 +49,11 @@
                     </div>
                 @endif
 
-                <form action="{{ route('admin.data-mentor.store') }}" method="POST">
+                <form action="{{ route('admin.data-mentor.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="space-y-5">
+
                         <div>
                             <label for="nama" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
                             <input id="nama" name="nama" value="{{ old('nama') }}" required placeholder="Masukkan nama lengkap mentor beserta gelar" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200" />
@@ -62,6 +63,54 @@
                             <label for="bidang" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Bidang / Spesialisasi Kompetensi</label>
                             <input id="bidang" name="bidang" value="{{ old('bidang') }}" required placeholder="Contoh: Web Developer, UI/UX Designer, HRD" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200" />
                         </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Alamat Email Resmi</label>
+                                <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="Contoh: mentor@gmail.com" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200" />
+                            </div>
+                            <div>
+                                <label for="no_hp" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">No. HP / WhatsApp</label>
+                                <input id="no_hp" type="text" name="no_hp" value="{{ old('no_hp') }}" placeholder="Contoh: 081234567890" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="jk" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Jenis Kelamin</label>
+                                <select id="jk" name="jk" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 cursor-pointer text-slate-600 font-medium">
+                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                    <option value="Laki-laki" {{ old('jk') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                                    <option value="Perempuan" {{ old('jk') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="status" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Status Aktif Mentor</label>
+                                <select id="status" name="status" class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 cursor-pointer text-slate-600 font-medium">
+                                    <option value="Aktif" {{ old('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                                    <option value="Tidak Aktif" {{ old('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="foto" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Foto Profile Resmi</label>
+                            <div class="mt-1 flex items-center justify-center border-2 border-slate-200 border-dashed rounded-xl p-4 bg-slate-50/50 hover:bg-slate-50 transition-colors duration-150">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-8 w-8 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4-4m4 24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-xs text-slate-600 justify-center">
+                                        <label for="foto" class="relative cursor-pointer rounded-md font-bold text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                            <span>Pilih File Gambar</span>
+                                            <input id="foto" name="foto" type="file" accept="image/*" class="sr-only">
+                                        </label>
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 font-medium">Format: JPG, JPEG, PNG maks 2MB</p>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="mt-8 flex items-center justify-end gap-4 border-t border-slate-100 pt-5">

@@ -13,13 +13,11 @@
     <div class="py-10 bg-slate-50/50 min-h-screen" x-data="{ search: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <!-- KARTU UTAMA DENGAN PILAR WARNA BIRU DONGKER / INDIGO -->
             <div class="bg-white shadow-sm rounded-2xl border border-slate-100 border-l-4 border-l-indigo-600 overflow-hidden">
 
                 <div class="px-6 py-5 border-b border-slate-100 bg-white">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div class="flex items-center space-x-3">
-                            <!-- Icon Siswa Bernuansa Dongker -->
                             <div class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
@@ -33,7 +31,6 @@
                         </div>
 
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-                            <!-- Input Search Box dengan Efek Glow Dongker -->
                             <div class="relative flex-1 sm:w-64">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -46,7 +43,6 @@
                                        class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 outline-none" />
                             </div>
 
-                            <!-- Tombol Utama Bernuansa Dongker -->
                             <a href="{{ route('admin.data-anak-magang.create') }}"
                                 class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-indigo-700 active:scale-[0.98] transition-all duration-200 shadow-md shadow-indigo-100 hover:shadow-lg whitespace-nowrap">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -58,55 +54,98 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto border border-slate-300 rounded-b-2xl bg-white">
                     <table class="min-w-full border-collapse text-left">
                         <thead>
-                            <tr class="bg-slate-50/70 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            <tr class="bg-slate-100 border-b border-slate-300 text-xs font-bold uppercase tracking-wider text-slate-700 divide-x divide-slate-300">
+                                <th class="px-6 py-4 w-12 text-center">No</th>
                                 <th class="px-6 py-4">NIM/NISN</th>
                                 <th class="px-6 py-4">Nama</th>
+                                <th class="px-6 py-4">Bidang Fokus</th>
                                 <th class="px-6 py-4">Instansi</th>
                                 <th class="px-6 py-4">Periode Magang</th>
                                 <th class="px-6 py-4">Mentor</th>
+                                <th class="px-6 py-4 text-center w-16">L/P</th>
+                                <th class="px-6 py-4 text-center">Status Magang</th>
                                 <th class="px-6 py-4 text-center">Status Akun</th>
-                                <th class="px-6 py-4 text-center pr-6">Aksi</th>
+                                <th class="px-6 py-4 text-center pr-6 w-32">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse($interns as $intern)
-                                <tr class="hover:bg-slate-50/50 transition-colors duration-150 text-sm"
+                        <tbody class="divide-y divide-slate-300">
+                            @forelse($interns as $index => $intern)
+                                <tr class="hover:bg-slate-50 transition-colors duration-150 text-sm divide-x divide-slate-200"
                                     x-show="'{{ strtolower($intern->nama) }}'.includes(search.toLowerCase()) ||
                                             '{{ strtolower($intern->nim_nisn) }}'.includes(search.toLowerCase()) ||
-                                            '{{ strtolower($intern->instansi) }}'.includes(search.toLowerCase())">
+                                            '{{ strtolower($intern->instansi) }}'.includes(search.toLowerCase()) ||
+                                            '{{ strtolower($intern->bidang ?? '') }}'.includes(search.toLowerCase())">
 
-                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-400 tracking-wide">
+                                    <td class="px-6 py-4 font-mono text-slate-500 text-center text-xs whitespace-nowrap bg-slate-50/50">
+                                        {{ $interns->firstItem() + $index }}
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-500 tracking-wide">
                                         {{ $intern->nim_nisn }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
+
+                                    <td class="px-6 py-4 whitespace-nowrap font-bold text-slate-800">
                                         {{ $intern->nama }}
                                     </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">
+                                        {{ $intern->bidang ?? '-' }}
+                                    </td>
+
                                     <td class="px-6 py-4 whitespace-nowrap text-slate-600">
-                                        <span class="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-md">
+                                        <span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-md uppercase">
                                             {{ $intern->instansi }}
                                         </span>
                                     </td>
+
                                     <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500 font-medium">
-                                        <div class="flex items-center space-x-1.5">
+                                        <div class="flex items-center space-x-1.5 font-mono">
                                             <span class="text-slate-700">{{ \Carbon\Carbon::parse($intern->tanggal_mulai_magang)->format('d M Y') }}</span>
                                             <span class="text-slate-300">→</span>
                                             <span class="text-slate-700">{{ \Carbon\Carbon::parse($intern->tanggal_selesai_magang)->format('d M Y') }}</span>
                                         </div>
                                     </td>
+
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($intern->mentor)
                                             <div class="flex items-center space-x-2">
                                                 <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                                                <span class="font-medium text-slate-700">{{ $intern->mentor->name }}</span>
+                                                <span class="font-bold text-slate-700">{{ $intern->mentor->name }}</span>
                                             </div>
                                         @else
                                             <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-600 border border-rose-100">Belum diplot</span>
                                         @endif
                                     </td>
-                                    <!-- Status Akun: Diubah dari soft-emerald ke soft-indigo (Dongker Halus) -->
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-center font-bold text-slate-600 text-xs">
+                                        @if($intern->jk === 'Laki-laki')
+                                            <span>L</span>
+                                        @elseif($intern->jk === 'Perempuan')
+                                            <span>P</span>
+                                        @else
+                                            <span class="text-slate-300">-</span>
+                                        @endif
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        @if($intern->status_magang === 'Berjalan')
+                                            <span class="inline-flex px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                                Berjalan
+                                            </span>
+                                        @elseif($intern->status_magang === 'Selesai')
+                                            <span class="inline-flex px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                Selesai
+                                            </span>
+                                        @else
+                                            <span class="inline-flex px-2 py-0.5 rounded-md text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                                Diberhentikan
+                                            </span>
+                                        @endif
+                                    </td>
+
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         @if ($intern->status_akun === 'Aktif')
                                             <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide bg-indigo-50 text-indigo-700 border border-indigo-200/50">
@@ -118,13 +157,14 @@
                                             </span>
                                         @endif
                                     </td>
+
                                     <td class="px-6 py-4 whitespace-nowrap text-center pr-6">
                                         <div class="inline-flex items-center justify-center space-x-2.5">
 
                                             @if ($intern->status_akun === 'Belum Dibuat')
                                                 <a href="{{ route('admin.users.create') }}?role=magang&data_magang_id={{ $intern->id }}"
                                                    title="Buat Akun Login"
-                                                   class="inline-flex p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-all duration-200">
+                                                   class="inline-flex p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-all duration-200 border border-indigo-100">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                                     </svg>
@@ -133,7 +173,7 @@
 
                                             <a href="{{ route('admin.data-anak-magang.edit', $intern->id) }}"
                                                title="Ubah Data"
-                                               class="inline-flex p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200">
+                                               class="inline-flex p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 border border-amber-200">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>
@@ -145,7 +185,7 @@
                                                 @csrf @method('DELETE')
                                                 <button type="submit"
                                                         title="Hapus Data"
-                                                        class="inline-flex p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition-all duration-200 cursor-pointer">
+                                                        class="inline-flex p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition-all duration-200 cursor-pointer border border-rose-200">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
@@ -157,7 +197,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-10 text-center text-sm text-slate-400 italic bg-slate-50/20">
+                                    <td colspan="11" class="px-6 py-12 text-center text-sm text-slate-400 italic bg-slate-50/50 font-medium">
                                         Belum ada data anak magang yang tersedia dalam arsip sistem.
                                     </td>
                                 </tr>
@@ -166,6 +206,14 @@
                     </table>
                 </div>
             </div>
+
+            @if($interns->hasPages())
+                <div class="mt-4 flex items-center justify-between bg-white px-4 py-3 sm:px-6 border border-slate-200 rounded-2xl shadow-sm">
+                    <div class="w-full">
+                        {{ $interns->links() }}
+                    </div>
+                </div>
+            @endif
 
         </div>
     </div>

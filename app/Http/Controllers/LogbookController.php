@@ -16,8 +16,19 @@ class LogbookController extends Controller
      */
     public function submitLogbook(Request $request)
     {
+        // $user = Auth::user();
+        // $user->load('DataAnakMagang'); // Pastikan relasi DataAnakMagang sudah dimuat
+        // if ($user->role !== 'magang') {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Hanya anak magang yang dapat mengumpulkan logbook.'
+        //     ], 403);
+        // }
+
         $user = Auth::user();
-        $user->load('DataAnakMagang'); // Pastikan relasi DataAnakMagang sudah dimuat
+        // 🔥 PERBAIKAN 1: Huruf awal harus kecil 'dataMagang' sesuai di model User.php
+        $user->load('dataMagang');
+
         if ($user->role !== 'magang') {
             return response()->json([
                 'success' => false,
@@ -98,11 +109,12 @@ class LogbookController extends Controller
 
         $query = Logbook::where('user_id', $userId);
 
-        // Filter: Tanggal spesifik atau 7 hari terakhir
-        if ($request->filled('tanggal')) {
-            $query->where('tanggal', $request->tanggal);
+        // 🔥 FILTER RENTANG WAKTU (WEB)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('tanggal', [$request->start_date, $request->end_date]);
         } else {
-            $query->where('tanggal', '>=', now()->subDays(7));
+            // Default 6 Hari Terakhir (termasuk hari ini)
+            $query->where('tanggal', '>=', now()->subDays(5));
         }
 
         $logbooks = $query->orderBy('tanggal', 'desc')
@@ -146,17 +158,17 @@ class LogbookController extends Controller
 
         $query = Logbook::where('user_id', $user->id);
 
-        // Cek apakah ada request tanggal untuk pencarian
-        if ($request->has('tanggal') && !empty($request->tanggal)) {
-            $query->where('tanggal', $request->tanggal);
+        // 🔥 FILTER RENTANG WAKTU (FLUTTER)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('tanggal', [$request->start_date, $request->end_date]);
         } else {
-            // Jika tidak ada pencarian, tampilkan 7 hari terakhir
-            $query->where('tanggal', '>=', now()->subDays(7));
+            // Default 6 Hari Terakhir (termasuk hari ini)
+            $query->where('tanggal', '>=', now()->subDays(5));
         }
-        // MENGURUTKAN DATA:
+
         $logbooks = $query->orderBy('tanggal', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(7);
+            ->paginate(50); // Angka dibesarkan agar bisa memuat data rentang waktu yang lebar
 
         return response()->json([
             'success' => true,

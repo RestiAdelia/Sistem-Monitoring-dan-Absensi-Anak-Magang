@@ -17,13 +17,13 @@ class InternDataController extends Controller
     public function index()
     {
         $interns = DataAnakMagang::with('mentor')
-            ->orderByRaw("CASE 
-            WHEN status_magang = 'Pending' THEN 1 
-            WHEN status_magang = 'Berjalan' THEN 2 
-            WHEN status_magang = 'Selesai' THEN 3 
-            ELSE 4 
+            ->orderByRaw("CASE
+            WHEN status_magang = 'Pending' THEN 1
+            WHEN status_magang = 'Berjalan' THEN 2
+            WHEN status_magang = 'Selesai' THEN 3
+            ELSE 4
         END ASC")
-            ->orderBy('nama', 'asc') 
+            ->orderBy('nama', 'asc')
             ->paginate(10);
 
         return view('admin.data-anak-magang.index', compact('interns'));

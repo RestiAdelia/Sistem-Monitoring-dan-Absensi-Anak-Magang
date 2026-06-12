@@ -323,30 +323,15 @@ class AttendanceController extends Controller
             $lampiranPath = $request->file('lampiran')->store('lampiran_absen', 'public');
         }
 
-        // 3. Loop untuk membuat record per hari
-        $currentDate = $start->copy();
-        $insertedData = [];
-
-        while ($currentDate->lte($end)) {
-            // Skip hari Sabtu dan Minggu jika kantor libur (Opsional)
-            // if ($currentDate->isWeekend()) {
-            //     $currentDate->addDay();
-            //     continue;
-            // }
-
-            $absensi = Absensi::create([
-                'user_id'           => $user->id,
-                'tanggal'           => $currentDate->toDateString(),
-                'status_kehadiran'  => $request->status_kehadiran,
-                'status_approval'   => 'pending',
-                'keterangan_pulang' => $request->keterangan, // Menyimpan alasan izin
-                'lampiran'          => $lampiranPath,
-                'status_kedatangan' => $request->status_kehadiran,
-            ]);
-
-            $insertedData[] = $absensi;
-            $currentDate->addDay();
-        }
+        $absensi = Absensi::create([
+            'user_id'           => $user->id,
+            'tanggal'           => $today,
+            'status_kehadiran'  => $request->status_kehadiran,
+            'status_approval'   => 'pending',
+            'keterangan_pulang' => $request->keterangan,
+            'lampiran'          => $lampiranPath,
+            'status_kedatangan' => $request->status_kehadiran,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -363,12 +348,14 @@ class AttendanceController extends Controller
     {
         if (Auth::user()->role !== 'admin') abort(403);
 
-        $pendingList = Absensi::with('user')
+        // PERBAIKAN: Menambahkan relasi dataMagang dan mengganti get() menjadi paginate(10)
+        $pendingAbsensis = Absensi::with(['user.dataMagang'])
             ->where('status_approval', 'pending')
+            ->whereIn('status_kehadiran', ['Izin', 'Sakit'])
             ->orderBy('tanggal', 'desc')
-            ->get();
+            ->paginate(10);
 
-        return view('admin.absensi.persetujuan', compact('pendingList'));
+        return view('admin.absensi.persetujuan', compact('pendingAbsensis'));
     }
 
     // -------------------------------------------------------
@@ -382,43 +369,75 @@ class AttendanceController extends Controller
     public function approveReject(Request $request)
     {
         $request->validate([
-            'ids'     => 'required|array', // Mengharuskan kiriman berupa array ID
-            'ids.*'   => 'exists:absensis,id',
-            'status'  => 'required|in:approved,rejected',
-            'catatan' => 'nullable|string'
+            // PERBAIKAN: Menyelaraskan nama input form dari file Blade persetujuan
+            'status_approval' => 'required|in:approved,rejected',
+            'keterangan_admin' => 'nullable|string|max:255'
         ]);
 
-        // Update semua data yang ID-nya ada di dalam array $request->ids
-        Absensi::whereIn('id', $request->ids)->update([
-            'status_approval'  => $request->status,
-            'keterangan_admin' => $request->catatan,
-            'updated_at'       => now()
+        $absensi = Absensi::findOrFail($id);
+        $absensi->update([
+            'status_approval'  => $request->status_approval,
+            'keterangan_admin' => $request->keterangan_admin
         ]);
 
-        $pesan = $request->status === 'approved' ? 'disetujui' : 'ditolak';
+        $pesan = $request->status_approval === 'approved' ? 'Pengajuan izin/sakit berhasil disetujui.' : 'Pengajuan izin/sakit berhasil ditolak.';
+        return back()->with('success', $pesan);
+    }
 
         return back()->with('success', "Total " . count($request->ids) . " pengajuan berhasil $pesan.");
     }
-
-    // Update fungsi summary agar hanya menghitung yang Approved
-    public function summary()
+    // -------------------------------------------------------
+    // Mobile API: Melihat riwayat pengajuan milik sendiri
+    // GET /api/absen/riwayat-pengajuan
+    // -------------------------------------------------------
+    public function riwayatPengajuan()
     {
-        $user  = Auth::user();
-        $month = Carbon::now()->month;
-        $year  = Carbon::now()->year;
+        $user = Auth::user();
 
-        $records = Absensi::where('user_id', $user->id)
-            ->whereMonth('tanggal', $month)
-            ->whereYear('tanggal', $year)
-            ->where('status_approval', 'approved') // Hanya yang disetujui
+        // Mengambil data yang statusnya Izin atau Sakit saja
+        $riwayat = Absensi::where('user_id', $user->id)
+            ->whereIn('status_kehadiran', ['Izin', 'Sakit'])
+            ->orderBy('tanggal', 'desc')
             ->get();
 
         return response()->json([
-            'success'   => true,
-            'hadir'     => $records->where('status_kehadiran', 'Hadir')->count(),
-            'izin'      => $records->where('status_kehadiran', 'Izin')->count(),
-            'sakit'     => $records->where('status_kehadiran', 'Sakit')->count(),
-            'terlambat' => $records->where('status_kedatangan', 'Terlambat')->count(),
+            'success' => true,
+            'message' => 'Daftar riwayat pengajuan berhasil diambil.',
+            'data'    => $riwayat
         ]);
+    }
+    // Update fungsi summary agar hanya menghitung yang Approved
+    public function summary()
+    {
+
+        $user  = Auth::user();
+    $month = Carbon::now()->month;
+    $year  = Carbon::now()->year;
+
+    // 1. Ambil semua data absensi user di bulan berjalan (Tanpa filter approved di awal)
+    $records = Absensi::where('user_id', $user->id)
+        ->whereMonth('tanggal', $month)
+        ->whereYear('tanggal', $year)
+        ->get();
+
+    // 2. Hitung 'Hadir' dan 'Terlambat' secara langsung (Otomatis masuk tanpa nunggu approve)
+    $hadir = $records->where('status_kehadiran', 'Hadir')->count();
+    $terlambat = $records->where('status_kedatangan', 'Terlambat')->count();
+
+    // 3. Hitung 'Izin' dan 'Sakit' HANYA jika sudah disetujui (approved) oleh Admin
+    $izin = $records->where('status_kehadiran', 'Izin')
+                    ->where('status_approval', 'approved')->count();
+
+    $sakit = $records->where('status_kehadiran', 'Sakit')
+                     ->where('status_approval', 'approved')->count();
+
+    // 4. Kembalikan response JSON ke Flutter
+    return response()->json([
+        'success'   => true,
+        'hadir'     => $hadir,
+        'izin'      => $izin,
+        'sakit'     => $sakit,
+        'terlambat' => $terlambat,
+    ]);
     }
 }

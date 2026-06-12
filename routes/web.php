@@ -51,10 +51,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('absensi-anak-magang', [AdminDashboardController::class, 'adminAbsensiIndex'])->name('absensi.index');
     Route::get('graduation', [GraduationController::class, 'adminIndex'])->name('graduation.index');
     Route::post('graduation/{intern}/certificate', [GraduationController::class, 'adminUploadCertificate'])->name('graduation.upload-certificate');
-    Route::get('data-anak-magang', function () {
-        $interns = DataAnakMagang::with('mentor')->orderBy('nama')->get();
-        return view('admin.data-anak-magang.index', compact('interns'));
-    })->name('data-anak-magang.index');
+    Route::get('data-anak-magang', [InternDataController::class, 'index'])->name('data-anak-magang.index');
     Route::get('data-mentor/create', [MentorDataController::class, 'create'])->name('data-mentor.create');
     Route::get('data-mentor/index', [MentorDataController::class, 'index'])->name('data-mentor.index');
     Route::post('data-mentor', [MentorDataController::class, 'store'])->name('data-mentor.store');
@@ -66,8 +63,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('data-mentor/{data_mentor}/edit', [MentorDataController::class, 'edit'])->name('data-mentor.edit');
     Route::put('data-mentor/{data_mentor}', [MentorDataController::class, 'update'])->name('data-mentor.update');
     Route::delete('data-mentor/{data_mentor}', [MentorDataController::class, 'destroy'])->name('data-mentor.destroy');
-    Route::get('/admin/absensi/persetujuan', [AttendanceController::class, 'pendingApprovals'])->name('admin.absensi.pending');
-    Route::post('/admin/absensi/approve/{id}', [AttendanceController::class, 'approveReject'])->name('admin.absensi.action');
+    Route::get('/admin/absensi/persetujuan', [AttendanceController::class, 'pendingApprovals'])->name('absensi.pending');
+    Route::post('/admin/absensi/approve/{id}', [AttendanceController::class, 'approveReject'])->name('absensi.action');
 });
 
 // Mentor dashboards (Attendance view, Logbook approval, Tasks distribution/grading, Graduation check)
@@ -75,13 +72,13 @@ Route::middleware(['auth', 'role:mentor'])->prefix('mentor')->name('mentor.')->g
     Route::get('dashboard', [MentorController::class, 'dashboard'])->name('dashboard');
     Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::get('logbooks', [LogbookController::class, 'index'])->name('logbooks.index');
-    Route::get('logbooks/{userId}', [LogbookController::class, 'showInternLogbooks'])->name('logbooks.show');   
+    Route::get('logbooks/{userId}', [LogbookController::class, 'showInternLogbooks'])->name('logbooks.show');
     Route::patch('/logbooks/{logbook}', [LogbookController::class, 'updateStatus'])
-            ->name('logbooks.update');
+        ->name('logbooks.update');
     Route::post('logbooks/{logbook}/status', [LogbookController::class, 'updateStatus'])->name('logbooks.update-status');
     Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('tasks/create', [TaskController::class, 'create'])->name('tasks.create');
-    Route::get('/tasks/{id}', [TaskController::class, 'show'])->name('tasks.show'); 
+    Route::get('/tasks/{id}', [TaskController::class, 'show'])->name('tasks.show');
     Route::get('tasks/{id}/detail', [TaskController::class, 'showTaskDetail'])->name('tasks.showTaskDetail');
     Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
     Route::post('tasks/{submission}/grade', [TaskController::class, 'gradeSubmission'])->name('tasks.grade');
